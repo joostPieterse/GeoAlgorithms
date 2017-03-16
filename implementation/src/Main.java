@@ -17,6 +17,7 @@ public class Main {
 
     private void processData(File file, String delimiter) {
         SpaceSquare spaceSquare = new SpaceSquare((int) ((MAX_LONG - MIN_LONG) / STEP_SIZE), (int) ((MAX_LAT - MIN_LAT) / STEP_SIZE));
+        spaceSquare.addRoute(new Route(73.70014, 40.50014, 73.70234, 40.50601,100.0));
         try {
             BufferedReader br = new BufferedReader(new FileReader(file));
             String lineString;
@@ -29,7 +30,7 @@ public class Main {
                 double endLong = Double.parseDouble(line[9]);
                 double endLat = Double.parseDouble(line[10]);
                 double tripDistance = Double.parseDouble(line[4]);
-                Route route = new Route(startLong, startLat, endLong, endLat, tripDistance);
+                spaceSquare.addRoute(new Route(startLong, startLat, endLong, endLat, tripDistance));
             }
 
             br.close();
