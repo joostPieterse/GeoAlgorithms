@@ -12,6 +12,7 @@ public class Main {
 
     public static void main(String[] args) {
         Main main = new Main();
+        //download: http://www.nyc.gov/html/tlc/html/about/trip_record_data.shtml
         main.processData(new File("data/yellow_tripdata_2016-01.csv"), ",");
     }
 
