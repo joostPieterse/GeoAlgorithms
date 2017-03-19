@@ -3,9 +3,16 @@ import static jdk.nashorn.internal.objects.NativeMath.round;
 
 public class SpaceSquare {
     private int[][] values;
+    //in degrees
+    private static final double MIN_LONG = 73.7;
+    private static final double MAX_LONG = 74.25;
+    private static final double MIN_LAT = 40.5;
+    private static final double MAX_LAT = 40.9;
     private static final double STEP_SIZE = 0.001;
 
-    public SpaceSquare(int longitude, int latitude) {
+    public SpaceSquare() {
+        int longitude = (int)((MAX_LONG - MIN_LONG) / STEP_SIZE);
+        int latitude = (int) ((MAX_LAT - MIN_LAT) / STEP_SIZE);
         this.values = new int[longitude][latitude];
     }
 

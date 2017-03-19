@@ -2,13 +2,6 @@ import java.io.*;
 
 public class Main {
 
-    //in degrees
-    private static final double MIN_LONG = 73.7;
-    private static final double MAX_LONG = 74.25;
-    private static final double MIN_LAT = 40.5;
-    private static final double MAX_LAT = 40.9;
-    private static final double STEP_SIZE = 0.001;
-
 
     public static void main(String[] args) {
         Main main = new Main();
@@ -26,12 +19,12 @@ public class Main {
             br.readLine();
             while ((lineString = br.readLine()) != null) {
                 String[] line = lineString.split(delimiter);
-                double startLong = Double.parseDouble(line[5]);
-                double startLat = Double.parseDouble(line[6]);
-                double endLong = Double.parseDouble(line[9]);
-                double endLat = Double.parseDouble(line[10]);
+                double startLong = Math.abs(Double.parseDouble(line[5]));
+                double startLat = Math.abs(Double.parseDouble(line[6]));
+                double endLong = Math.abs(Double.parseDouble(line[9]));
+                double endLat = Math.abs(Double.parseDouble(line[10]));
                 double tripDistance = Double.parseDouble(line[4]);
-                spaceSquare.addRoute(new Route(startLong, startLat, endLong, endLat, tripDistance));
+                //spaceSquare.addRoute(new Route(startLong, startLat, endLong, endLat, tripDistance));
             }
 
             br.close();
