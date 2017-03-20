@@ -10,8 +10,9 @@ public class Main {
     }
 
     private void processData(File file, String delimiter) {
-        SpaceSquare spaceSquare = new SpaceSquare((int) ((MAX_LONG - MIN_LONG) / STEP_SIZE), (int) ((MAX_LAT - MIN_LAT) / STEP_SIZE));
+        SpaceSquare spaceSquare = new SpaceSquare();
         spaceSquare.addRoute(new Route(73.70014, 40.50014, 73.70234, 40.50601,100.0));
+        spaceSquare.printValues();
         try {
             BufferedReader br = new BufferedReader(new FileReader(file));
             String lineString;
