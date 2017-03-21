@@ -11,7 +11,7 @@ public class SpaceTimeCube {
     private static final double STEP_SIZE = 0.001;
 
     //in minutes
-    private static final double TIME_STEP_SIZE = 60;
+    private static final int TIME_STEP_SIZE = 60;
 
     public SpaceTimeCube() {
         int longitude = (int) ((MAX_LONG - MIN_LONG) / STEP_SIZE);
@@ -19,10 +19,20 @@ public class SpaceTimeCube {
         this.values = new int[longitude][latitude][(int) (24 * 60 / TIME_STEP_SIZE)];
     }
 
+    /**
+     * update the values in the cube that are on the route
+     *
+     * @param route
+     */
     public void addRoute(Route route) {
         double difLat = abs(route.endLat - route.startLat);
         double difLong = abs(route.endLong - route.startLong);
+        double difTime = route.endTime - route.startTime;
+        if (difTime < 0) {
+            difTime += 60 * 24;
+        }
         double slope = difLat / difLong;
+        double timeSlope = difTime / difLong;
         System.out.println(slope);
         for (double i = 0; i <= difLong; i += STEP_SIZE) {
             // Defining which x coordinate we are at now
@@ -33,19 +43,34 @@ public class SpaceTimeCube {
             minLat = ((double) ((int) (minLat / STEP_SIZE))) * STEP_SIZE;
             double maxLat = route.startLat + ((i + STEP_SIZE) * slope);
 
+            int minTime = (int) (route.startTime + (i * timeSlope));
+            minTime = ((int) (minTime / TIME_STEP_SIZE)) * TIME_STEP_SIZE;
+            int maxTime = (int) (route.startTime + ((i + STEP_SIZE) * timeSlope));
+
             for (double j = minLat; j <= maxLat; j += STEP_SIZE) {
-                if (j <= Math.max(route.startLat, route.endLat) && j >= Math.min(route.startLat, route.endLat)) {
+                for (int k = minTime; k <= maxTime; k += TIME_STEP_SIZE) {
+                    /*if (j <= Math.max(route.startLat, route.endLat) && j >= Math.min(route.startLat, route.endLat) &&
+                            xLong <= Math.max(route.startLong, route.endLong) && xLong >= Math.min(route.startLong, route.endLong)) {*/
                     System.out.println("I appended shit to M[" +
-                            String.format("$%,.3f", xLong) + ", " + String.format("$%,.3f", j) + "]");
-                    increaseValue(j, xLong, 0);
+                            String.format("$%,.3f", xLong) + ", " + String.format("$%,.3f", j) + String.format("$%,d", k) + "]");
+                    increaseValue(j, xLong, k);
+                    //}
                 }
             }
         }
     }
 
+    /**
+     * increase a value at given coordinate (in degrees/minutes)
+     *
+     * @param latitude
+     * @param longitude
+     * @param time
+     */
     private void increaseValue(double latitude, double longitude, int time) {
         int latSteps = (int) ((latitude - MIN_LAT) / STEP_SIZE);
         int longSteps = (int) ((longitude - MIN_LONG) / STEP_SIZE);
+        time = time % (60 * 24);
         int timeSteps = (int) (time / TIME_STEP_SIZE);
         values[longSteps][latSteps][timeSteps]++;
     }
@@ -59,7 +84,7 @@ public class SpaceTimeCube {
             for (int j = 0; j < values[i].length; j++) {
                 for (int k = 0; k < values[i][j].length; k++) {
                     if (values[i][j][k] > 0) {
-                        System.out.println("[" + i + ", " + j + ", " + k + "] " + values[i][j]);
+                        System.out.println("[" + i + ", " + j + ", " + k + "] " + values[i][j][k]);
                     }
                 }
             }
