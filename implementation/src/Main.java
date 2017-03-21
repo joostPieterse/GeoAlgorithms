@@ -1,4 +1,9 @@
 import java.io.*;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 public class Main {
 
@@ -28,7 +33,7 @@ public class Main {
                 double endLong = Math.abs(Double.parseDouble(line[9]));
                 double endLat = Math.abs(Double.parseDouble(line[10]));
 
-                if(startLong!=0 && startLat != 0 && endLong != 0 && endLat != 0){
+                if (startLong != 0 && startLat != 0 && endLong != 0 && endLat != 0) {
                     spaceTimeCube.addRoute(new Route(startLong, startLat, endLong, endLat, tripDistance, pickUpTime, dropOffTime));
                 }
             }
@@ -40,15 +45,18 @@ public class Main {
     }
 
     // Converts a timestamp to minutes
-    // @Param timeString, provides a timestamp of the form of "1/29/2016 10:43:02"
+    // @Param timeString, provides a timestamp of the form of "01-29-2016 10:43:02"
     // @Returns amount of minutes since 00:00
-    private int convertTimeStampToMinutes(String timeString){
-        String[] splited = timeString.split("\\s+");
-        int minutes = 0;
-        minutes += Integer.parseInt(Character.toString(splited[1].charAt(0)))*10*60;
-        minutes += Integer.parseInt(Character.toString(splited[1].charAt(1)))*60;
-        minutes += Integer.parseInt(Character.toString(splited[1].charAt(3)))*10;
-        minutes += Integer.parseInt(Character.toString(splited[1].charAt(4)));
-        return minutes;
+    private int convertTimeStampToMinutes(String timeString) {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = null;
+        try {
+            date = dateFormat.parse(timeString);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        Calendar cal = Calendar.getInstance(); // creates calendar
+        cal.setTime(date);
+        return cal.get(Calendar.HOUR_OF_DAY) * 60 + cal.get(Calendar.MINUTE);
     }
 }
