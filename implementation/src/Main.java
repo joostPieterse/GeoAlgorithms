@@ -10,9 +10,9 @@ public class Main {
     }
 
     private void processData(File file, String delimiter) {
-        SpaceSquare spaceSquare = new SpaceSquare();
-//        spaceSquare.addRoute(new Route(73.70014, 40.50014, 73.70234, 40.50601,100.0));
-//        spaceSquare.printValues();
+        SpaceTimeCube spaceTimeCube = new SpaceTimeCube();
+        spaceTimeCube.addRoute(new Route(73.70014, 40.50014, 73.70234, 40.50601,100.0, 60, 180));
+        spaceTimeCube.printValues();
         try {
             BufferedReader br = new BufferedReader(new FileReader(file));
             String lineString;
@@ -29,13 +29,11 @@ public class Main {
                 double endLat = Math.abs(Double.parseDouble(line[10]));
 
                 if(startLong!=0 && startLat != 0 && endLong != 0 && endLat != 0){
-                    spaceSquare.addRoute(new Route(startLong, startLat, endLong, endLat, tripDistance, pickUpTime, dropOffTime));
+                    spaceTimeCube.addRoute(new Route(startLong, startLat, endLong, endLat, tripDistance, pickUpTime, dropOffTime));
                 }
             }
 
             br.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
