@@ -25,6 +25,9 @@ public class SpaceTimeCube {
      * @param route
      */
     public void addRoute(Route route) {
+        System.out.println("---------------------------------------------------------------------------------------------" +
+                "NEW POINT!"+
+        "--------------------------------------------------------------------------------------------------------");
         System.out.println("StartLong: "+route.startLong+" EndLong: "+route.endLong+
                 " StartLat: "+route.startLat+" EndLat: "+route.endLat+
                 " StartTime: "+route.startTime+" EndTime: "+route.endTime);
@@ -44,8 +47,8 @@ public class SpaceTimeCube {
         }
 
         // Calculating the differences and which direction the cab went.
-        double difLong = abs(route.endLong - route.startLong);
-        double difLat = abs(route.endLat - route.startLat);
+        double difLong = route.endLong - route.startLong;
+        double difLat = route.endLat - route.startLat;
 
         double directionLong = Math.signum(route.endLong - route.startLong);
         double directionLat = Math.signum(route.endLat - route.startLat);
@@ -88,11 +91,11 @@ public class SpaceTimeCube {
                     current_stop_x = route.endLong;
                 }
             } else { // If the direction is decreasing horizontaly
-                current_start_x = ((int) (xLong / STEP_SIZE)) * STEP_SIZE;
+                current_start_x = ((int) (xLong / STEP_SIZE)+1) * STEP_SIZE;
                 if(current_start_x > route.startLong){
                     current_start_x = route.startLong;
                 }
-                current_stop_x = ((int) (xLong / STEP_SIZE)+1) * STEP_SIZE;
+                current_stop_x = ((int) (xLong / STEP_SIZE)) * STEP_SIZE;
                 if(current_stop_x < route.endLong){
                     current_stop_x = route.endLong;
                 }
@@ -100,7 +103,13 @@ public class SpaceTimeCube {
 
             current_start_y = getYValue(a_slope, b_start, current_start_x);
             current_stop_y = getYValue(a_slope, b_start, current_stop_x);
-            double rounded_current_x = ((int)(current_start_x/STEP_SIZE))*STEP_SIZE;
+
+            double rounded_current_x;
+            if(directionLong==1){
+                rounded_current_x = ((int)(current_start_x/STEP_SIZE))*STEP_SIZE;
+            } else {
+                rounded_current_x = ((int)(current_stop_x/STEP_SIZE))*STEP_SIZE;
+            }
             double rounded_current_stop_y = ((int)(current_stop_y/STEP_SIZE))*STEP_SIZE;
 
 //            int minTime = (int) (route.startTime + (i * timeSlope));
@@ -108,15 +117,18 @@ public class SpaceTimeCube {
 //            int maxTime = (int) (route.startTime + ((i + STEP_SIZE) * timeSlope));
 
             int k = 0;
-
+            System.out.println("---------------------------------------------- NEW LINE ----------------------------------------");
+            System.out.println("Starting for2 with "+rounded_current_x+" and "+directionLong+" and "+directionLat+" and "+rounded_current_stop_y);
+            System.out.println("Coordinate start "+current_start_x+" and "+current_start_y);
+            System.out.println("Coordinate end "+current_stop_x+" and "+current_stop_y);
             for (double yLat = current_start_y;
                  (directionLat == 1 && yLat <= rounded_current_stop_y + STEP_SIZE) ||
-                         (directionLat != 1 && yLat >= rounded_current_stop_y - STEP_SIZE);
+                         (directionLat != 1 && yLat >= rounded_current_stop_y);
                  yLat += STEP_SIZE_VER) {
 //                if (j <= Math.max(route.startLat, route.endLat) && j >= Math.min(route.startLat, route.endLat) &&
 //                        xLong <= Math.max(route.startLong, route.endLong) && xLong >= Math.min(route.startLong, route.endLong)) {
                 double rounded_current_y = ((int)(yLat/STEP_SIZE))*STEP_SIZE;
-                System.out.println("I appended shit to M[" +
+                System.out.println("M[" +
                         String.format("$%,.3f", rounded_current_x) + ", " + String.format("$%,.3f", rounded_current_y) + ", "+String.format("$%,d", k) + "]");
                 increaseValue(yLat, xLong, k);
 
