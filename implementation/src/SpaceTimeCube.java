@@ -1,7 +1,8 @@
 import static java.lang.Math.abs;
 
-public class SpaceSquare {
-    private int[][] values;
+public class SpaceTimeCube {
+
+    private int[][][] values;
     //in degrees
     private static final double MIN_LONG = 73.7;
     private static final double MAX_LONG = 74.25;
@@ -9,10 +10,13 @@ public class SpaceSquare {
     private static final double MAX_LAT = 40.9;
     private static final double STEP_SIZE = 0.001;
 
-    public SpaceSquare() {
+    //in minutes
+    private static final double TIME_STEP_SIZE = 60;
+
+    public SpaceTimeCube() {
         int longitude = (int) ((MAX_LONG - MIN_LONG) / STEP_SIZE);
         int latitude = (int) ((MAX_LAT - MIN_LAT) / STEP_SIZE);
-        this.values = new int[longitude][latitude];
+        this.values = new int[longitude][latitude][(int) (24*60/TIME_STEP_SIZE)];
     }
 
     public void addRoute(Route route) {
@@ -45,7 +49,7 @@ public class SpaceSquare {
         values[longSteps][latSteps]++;
     }
 
-    public int[][] getValues() {
+    public int[][][] getValues() {
         return values;
     }
 
