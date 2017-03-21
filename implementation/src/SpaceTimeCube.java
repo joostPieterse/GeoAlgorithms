@@ -48,7 +48,7 @@ public class SpaceTimeCube {
         double difLat = abs(route.endLat - route.startLat);
 
         double directionLong = Math.signum(route.endLong - route.startLong);
-        double directionLat = Math.signum(route.endLong - route.startLong);
+        double directionLat = Math.signum(route.endLat - route.startLat);
 
         // Step sizes. Whether they should be positive or negative.
         double STEP_SIZE_HOR = STEP_SIZE;
