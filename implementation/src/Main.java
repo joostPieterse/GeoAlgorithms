@@ -10,9 +10,9 @@ public class Main {
     }
 
     private void processData(File file, String delimiter) {
-        SpaceSquare spaceSquare = new SpaceSquare();
-        spaceSquare.addRoute(new Route(73.70014, 40.50014, 73.70234, 40.50601,100.0));
-        spaceSquare.printValues();
+        SpaceTimeCube spaceTimeCube = new SpaceTimeCube();
+        spaceTimeCube.addRoute(new Route(73.70014, 40.50014, 73.70234, 40.50601,100.0, 60, 180));
+        spaceTimeCube.printValues();
         try {
             BufferedReader br = new BufferedReader(new FileReader(file));
             String lineString;
@@ -25,7 +25,7 @@ public class Main {
                 double endLong = Math.abs(Double.parseDouble(line[9]));
                 double endLat = Math.abs(Double.parseDouble(line[10]));
                 double tripDistance = Double.parseDouble(line[4]);
-                //spaceSquare.addRoute(new Route(startLong, startLat, endLong, endLat, tripDistance));
+                //spaceTimeCube.addRoute(new Route(startLong, startLat, endLong, endLat, tripDistance));
             }
 
             br.close();

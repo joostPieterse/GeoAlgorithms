@@ -16,7 +16,7 @@ public class SpaceTimeCube {
     public SpaceTimeCube() {
         int longitude = (int) ((MAX_LONG - MIN_LONG) / STEP_SIZE);
         int latitude = (int) ((MAX_LAT - MIN_LAT) / STEP_SIZE);
-        this.values = new int[longitude][latitude][(int) (24*60/TIME_STEP_SIZE)];
+        this.values = new int[longitude][latitude][(int) (24 * 60 / TIME_STEP_SIZE)];
     }
 
     public void addRoute(Route route) {
@@ -37,16 +37,17 @@ public class SpaceTimeCube {
                 if (j <= Math.max(route.startLat, route.endLat) && j >= Math.min(route.startLat, route.endLat)) {
                     System.out.println("I appended shit to M[" +
                             String.format("$%,.3f", xLong) + ", " + String.format("$%,.3f", j) + "]");
-                    increaseValue(j, xLong);
+                    increaseValue(j, xLong, 0);
                 }
             }
         }
     }
 
-    private void increaseValue(double latitude, double longitude) {
+    private void increaseValue(double latitude, double longitude, int time) {
         int latSteps = (int) ((latitude - MIN_LAT) / STEP_SIZE);
         int longSteps = (int) ((longitude - MIN_LONG) / STEP_SIZE);
-        values[longSteps][latSteps]++;
+        int timeSteps = (int) (time / TIME_STEP_SIZE);
+        values[longSteps][latSteps][timeSteps]++;
     }
 
     public int[][][] getValues() {
@@ -56,8 +57,10 @@ public class SpaceTimeCube {
     public void printValues() {
         for (int i = 0; i < values.length; i++) {
             for (int j = 0; j < values[i].length; j++) {
-                if (values[i][j] > 0) {
-                    System.out.println("[" + i + ", " + j + "] " + values[i][j]);
+                for (int k = 0; k < values[i][j].length; k++) {
+                    if (values[i][j][k] > 0) {
+                        System.out.println("[" + i + ", " + j + ", " + k + "] " + values[i][j]);
+                    }
                 }
             }
         }
