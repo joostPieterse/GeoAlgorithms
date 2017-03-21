@@ -1,5 +1,4 @@
 import static java.lang.Math.abs;
-import static jdk.nashorn.internal.objects.NativeMath.round;
 
 public class SpaceSquare {
     private int[][] values;
@@ -31,9 +30,11 @@ public class SpaceSquare {
             double maxLat = route.startLat + ((i + STEP_SIZE) * slope);
 
             for (double j = minLat; j <= maxLat; j += STEP_SIZE) {
-                System.out.println("I appended shit to M[" +
-                        String.format("$%,.3f", xLong) + ", " + String.format("$%,.3f", j) + "]");
-                increaseValue(j, xLong);
+                if (j <= Math.max(route.startLat, route.endLat) && j >= Math.min(route.startLat, route.endLat)) {
+                    System.out.println("I appended shit to M[" +
+                            String.format("$%,.3f", xLong) + ", " + String.format("$%,.3f", j) + "]");
+                    increaseValue(j, xLong);
+                }
             }
         }
     }
@@ -51,8 +52,8 @@ public class SpaceSquare {
     public void printValues() {
         for (int i = 0; i < values.length; i++) {
             for (int j = 0; j < values[i].length; j++) {
-                if(values[i][j]>0){
-                    System.out.println("["+i+", "+j+"] "+values[i][j]);
+                if (values[i][j] > 0) {
+                    System.out.println("[" + i + ", " + j + "] " + values[i][j]);
                 }
             }
         }
