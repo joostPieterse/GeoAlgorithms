@@ -14,8 +14,8 @@ public class SpaceTimeCube {
     private static final int TIME_STEP_SIZE = 60;
 
     public SpaceTimeCube() {
-        int longitude = (int) ((MAX_LONG - MIN_LONG) / STEP_SIZE);
-        int latitude = (int) ((MAX_LAT - MIN_LAT) / STEP_SIZE);
+        int longitude = (int) ((MAX_LONG - MIN_LONG) / STEP_SIZE)+1;
+        int latitude = (int) ((MAX_LAT - MIN_LAT) / STEP_SIZE)+1;
         this.values = new int[longitude][latitude][(int) (24 * 60 / TIME_STEP_SIZE)];
     }
 
@@ -71,8 +71,9 @@ public class SpaceTimeCube {
         double timeSlope = difTime / difLong;
         System.out.println("y= "+a_slope+" x +"+b_start);
         for (double xLong = route.startLong;
-             (directionLong==1 && xLong <= endLong + STEP_SIZE) ||
-                     (directionLong!=1 && xLong >= endLong);
+             ((directionLong==1 && xLong <= endLong + STEP_SIZE) ||
+                     (directionLong!=1 && xLong >= endLong)) &&
+                     (xLong >= MIN_LONG && xLong < MAX_LONG);
              xLong += STEP_SIZE_HOR){
 
             double current_start_x;
@@ -122,14 +123,16 @@ public class SpaceTimeCube {
             System.out.println("Coordinate start "+current_start_x+" and "+current_start_y);
             System.out.println("Coordinate end "+current_stop_x+" and "+current_stop_y);
             for (double yLat = current_start_y;
-                 (directionLat == 1 && yLat <= rounded_current_stop_y + STEP_SIZE) ||
-                         (directionLat != 1 && yLat >= rounded_current_stop_y);
+                 ((directionLat == 1 && yLat <= rounded_current_stop_y + STEP_SIZE) ||
+                         (directionLat != 1 && yLat >= rounded_current_stop_y)) &&
+                         (yLat >= MIN_LAT  && yLat < MAX_LAT);
                  yLat += STEP_SIZE_VER) {
 //                if (j <= Math.max(route.startLat, route.endLat) && j >= Math.min(route.startLat, route.endLat) &&
 //                        xLong <= Math.max(route.startLong, route.endLong) && xLong >= Math.min(route.startLong, route.endLong)) {
                 double rounded_current_y = ((int)(yLat/STEP_SIZE))*STEP_SIZE;
                 System.out.println("M[" +
                         String.format("$%,.3f", rounded_current_x) + ", " + String.format("$%,.3f", rounded_current_y) + ", "+String.format("$%,d", k) + "]");
+
                 increaseValue(yLat, xLong, k);
 
 //                for (int k = minTime; k <= maxTime; k += TIME_STEP_SIZE) {
