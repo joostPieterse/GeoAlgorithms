@@ -20,23 +20,36 @@ public class SpaceTimeCube {
     }
 
     public void addRoute(Route route) {
-        double difLat = abs(route.endLat - route.startLat);
+        System.out.println("StartLong: "+route.startLong+" EndLong: "+route.endLong+
+                " StartLat: "+route.startLat+" EndLat: "+route.endLat);
+        double startLong = ((int) (route.startLong / STEP_SIZE))*STEP_SIZE;
         double difLong = abs(route.endLong - route.startLong);
+        double directionLong = Math.signum(route.endLong - route.startLong);
+        double difLat = abs(route.endLat - route.startLat);
+        double directionLat = Math.signum(route.endLong - route.startLong);
         double slope = difLat / difLong;
         System.out.println(slope);
-        for (double i = 0; i <= difLong; i += STEP_SIZE) {
+        for (double i = 0; i <= difLong; i += STEP_SIZE){
             // Defining which x coordinate we are at now
-            double xLong = route.startLong + i;
-
-            double minLat = route.startLat + (i * slope);
-            // Rounding the minLat such that it fits the step_size.
-            minLat = ((double) ((int) (minLat / STEP_SIZE))) * STEP_SIZE;
-            double maxLat = route.startLat + ((i + STEP_SIZE) * slope);
+            double xLong; //
+            double minLat; // Rounding this down to the stepsize to avoid weird digits
+            double maxLat;
+            if(directionLong==1){
+                xLong = startLong + i;
+                minLat = route.startLat + (i * slope);
+                minLat = ((double) ((int) (minLat / STEP_SIZE))) * STEP_SIZE;
+                maxLat = route.startLat + ((i + STEP_SIZE) * slope);
+            } else {
+                xLong = startLong - i;
+                minLat = route.startLat - (i * slope);
+                minLat = ((double) ((int) (minLat / STEP_SIZE))) * STEP_SIZE;
+                maxLat = route.startLat + ((i - STEP_SIZE) * slope);
+            }
 
             for (double j = minLat; j <= maxLat; j += STEP_SIZE) {
                 if (j <= Math.max(route.startLat, route.endLat) && j >= Math.min(route.startLat, route.endLat)) {
                     System.out.println("I appended shit to M[" +
-                            String.format("$%,.3f", xLong) + ", " + String.format("$%,.3f", j) + "]");
+                            String.format("%,.4f", xLong) + ", " + String.format("%,.4f", j) + "]");
                     increaseValue(j, xLong, 0);
                 }
             }

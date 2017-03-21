@@ -6,7 +6,7 @@ public class Main {
     public static void main(String[] args) {
         Main main = new Main();
         //download: http://www.nyc.gov/html/tlc/html/about/trip_record_data.shtml
-        main.processData(new File("data/yellow_tripdata_2016-01.csv"), ",");
+        main.processData(new File("C:\\Users\\Administrator\\IdeaProjects\\GeoAlgorithms\\implementation/data/yellow_tripdata_2016-01.csv"), ",");
     }
 
     private void processData(File file, String delimiter) {
@@ -40,19 +40,15 @@ public class Main {
     }
 
     // Converts a timestamp to minutes
-    // @Param timeString, provides a timestamp of the form of "1/29/2016 10:43"
+    // @Param timeString, provides a timestamp of the form of "1/29/2016 10:43:02"
     // @Returns amount of minutes since 00:00
     private int convertTimeStampToMinutes(String timeString){
         String[] splited = timeString.split("\\s+");
         int minutes = 0;
-        int index = 0;
-        if(splited[1].length()==5){
-            minutes += Integer.parseInt(Character.toString(splited[1].charAt(0)))*10*60;
-            index++;
-        }
-        minutes += Integer.parseInt(Character.toString(splited[1].charAt(index)))*60;
-        minutes += Integer.parseInt(Character.toString(splited[1].charAt(index+2)))*10;
-        minutes += Integer.parseInt(Character.toString(splited[1].charAt(index+3)));
+        minutes += Integer.parseInt(Character.toString(splited[1].charAt(0)))*10*60;
+        minutes += Integer.parseInt(Character.toString(splited[1].charAt(1)))*60;
+        minutes += Integer.parseInt(Character.toString(splited[1].charAt(3)))*10;
+        minutes += Integer.parseInt(Character.toString(splited[1].charAt(4)));
         return minutes;
     }
 }
