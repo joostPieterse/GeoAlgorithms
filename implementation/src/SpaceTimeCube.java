@@ -49,12 +49,12 @@ public class SpaceTimeCube {
 
             for (double j = minLat; j <= maxLat; j += STEP_SIZE) {
                 for (int k = minTime; k <= maxTime; k += TIME_STEP_SIZE) {
-                    /*if (j <= Math.max(route.startLat, route.endLat) && j >= Math.min(route.startLat, route.endLat) &&
-                            xLong <= Math.max(route.startLong, route.endLong) && xLong >= Math.min(route.startLong, route.endLong)) {*/
+                    if (j <= Math.max(route.startLat, route.endLat) && j >= Math.min(route.startLat, route.endLat) &&
+                            xLong <= Math.max(route.startLong, route.endLong) && xLong >= Math.min(route.startLong, route.endLong)) {
                     System.out.println("I appended shit to M[" +
                             String.format("$%,.3f", xLong) + ", " + String.format("$%,.3f", j) + String.format("$%,d", k) + "]");
                     increaseValue(j, xLong, k);
-                    //}
+                    }
                 }
             }
         }
