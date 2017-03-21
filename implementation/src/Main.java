@@ -20,12 +20,17 @@ public class Main {
             br.readLine();
             while ((lineString = br.readLine()) != null) {
                 String[] line = lineString.split(delimiter);
+                double pickUpTime = Double.parseDouble(line[1]);
+                double dropOffTime = Double.parseDouble(line[2]);
+                double tripDistance = Double.parseDouble(line[4]);
                 double startLong = Math.abs(Double.parseDouble(line[5]));
                 double startLat = Math.abs(Double.parseDouble(line[6]));
                 double endLong = Math.abs(Double.parseDouble(line[9]));
                 double endLat = Math.abs(Double.parseDouble(line[10]));
-                double tripDistance = Double.parseDouble(line[4]);
-                //spaceTimeCube.addRoute(new Route(startLong, startLat, endLong, endLat, tripDistance));
+
+                if(startLong!=0 && startLat != 0 && endLong != 0 && endLat != 0){
+                    spaceTimeCube.addRoute(new Route(startLong, startLat, endLong, endLat, tripDistance,0,0));
+                }
             }
 
             br.close();
