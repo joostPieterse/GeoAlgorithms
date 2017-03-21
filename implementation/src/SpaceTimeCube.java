@@ -26,52 +26,125 @@ public class SpaceTimeCube {
      */
     public void addRoute(Route route) {
         System.out.println("StartLong: "+route.startLong+" EndLong: "+route.endLong+
-                " StartLat: "+route.startLat+" EndLat: "+route.endLat);
+                " StartLat: "+route.startLat+" EndLat: "+route.endLat+
+                " StartTime: "+route.startTime+" EndTime: "+route.endTime);
+
+        // Start out by rounding all variables as we won't use non-rounded.
         double startLong = ((int) (route.startLong / STEP_SIZE))*STEP_SIZE;
-        double difLong = abs(route.endLong - route.startLong);
-        double directionLong = Math.signum(route.endLong - route.startLong);
-        double difLat = abs(route.endLat - route.startLat);
-        double directionLat = Math.signum(route.endLong - route.startLong);
-        double difTime = route.endTime - route.startTime;
+        double endLong = ((int) (route.endLong / STEP_SIZE))*STEP_SIZE;
+        double startLat = ((int) (route.startLat / STEP_SIZE))*STEP_SIZE;
+        double endLat = ((int) (route.endLat / STEP_SIZE))*STEP_SIZE;
+
+        // Specifying time
+        int startTime = route.startTime;
+        int endTime = route.endTime;
+        int difTime = route.endTime - route.startTime;
         if (difTime < 0) {
             difTime += 60 * 24;
         }
-        double slope = difLat / difLong;
+
+        // Calculating the differences and which direction the cab went.
+        double difLong = abs(route.endLong - route.startLong);
+        double difLat = abs(route.endLat - route.startLat);
+
+        double directionLong = Math.signum(route.endLong - route.startLong);
+        double directionLat = Math.signum(route.endLong - route.startLong);
+
+        // Step sizes. Whether they should be positive or negative.
+        double STEP_SIZE_HOR = STEP_SIZE;
+        if(directionLong!=1){
+            STEP_SIZE_HOR = 0 - STEP_SIZE;
+        }
+        double STEP_SIZE_VER = STEP_SIZE;
+        if(directionLat!=1){
+            STEP_SIZE_VER = 0 - STEP_SIZE;
+        }
+
+        // Calculating the slope and the line
+        // The line is a formula consisting of y=ax+b. a_slope is a and b_start is b
+        double a_slope = difLat / difLong;
+        double b_start = route.endLat - a_slope*route.endLong;
+
         double timeSlope = difTime / difLong;
-        System.out.println(slope);
-        for (double i = 0; i <= difLong; i += STEP_SIZE){
-            // Defining which x coordinate we are at now
-            double xLong; //
-            double minLat; // Rounding this down to the stepsize to avoid weird digits
-            double maxLat;
+        System.out.println("y= "+a_slope+" x +"+b_start);
+        for (double xLong = route.startLong;
+             (directionLong==1 && xLong <= endLong + STEP_SIZE) ||
+                     (directionLong!=1 && xLong >= endLong);
+             xLong += STEP_SIZE_HOR){
+
+            double current_start_x;
+            double current_stop_x;
+            double current_start_y;
+            double current_stop_y;
+
+            // If the direction is increasing horizontally
             if(directionLong==1){
-                xLong = startLong + i;
-                minLat = route.startLat + (i * slope);
-                minLat = ((double) ((int) (minLat / STEP_SIZE))) * STEP_SIZE;
-                maxLat = route.startLat + ((i + STEP_SIZE) * slope);
-            } else {
-                xLong = startLong - i;
-                minLat = route.startLat - (i * slope);
-                minLat = ((double) ((int) (minLat / STEP_SIZE))) * STEP_SIZE;
-                maxLat = route.startLat + ((i - STEP_SIZE) * slope);
+                current_start_x = ((int) (xLong / STEP_SIZE)) * STEP_SIZE;
+                if(current_start_x < route.startLong){
+                    current_start_x = route.startLong;
+                }
+                current_stop_x = ((int) (xLong / STEP_SIZE)+1) * STEP_SIZE;
+                if(current_stop_x > route.endLong){
+                    current_stop_x = route.endLong;
+                }
+            } else { // If the direction is decreasing horizontaly
+                current_start_x = ((int) (xLong / STEP_SIZE)) * STEP_SIZE;
+                if(current_start_x > route.startLong){
+                    current_start_x = route.startLong;
+                }
+                current_stop_x = ((int) (xLong / STEP_SIZE)+1) * STEP_SIZE;
+                if(current_stop_x < route.endLong){
+                    current_stop_x = route.endLong;
+                }
             }
 
-            int minTime = (int) (route.startTime + (i * timeSlope));
-            minTime = ((int) (minTime / TIME_STEP_SIZE)) * TIME_STEP_SIZE;
-            int maxTime = (int) (route.startTime + ((i + STEP_SIZE) * timeSlope));
+            current_start_y = getYValue(a_slope, b_start, current_start_x);
+            current_stop_y = getYValue(a_slope, b_start, current_stop_x);
+            double rounded_current_x = ((int)(current_start_x/STEP_SIZE))*STEP_SIZE;
+            double rounded_current_stop_y = ((int)(current_stop_y/STEP_SIZE))*STEP_SIZE;
 
-            for (double j = minLat; j <= maxLat; j += STEP_SIZE) {
-                for (int k = minTime; k <= maxTime; k += TIME_STEP_SIZE) {
-                    if (j <= Math.max(route.startLat, route.endLat) && j >= Math.min(route.startLat, route.endLat) &&
-                            xLong <= Math.max(route.startLong, route.endLong) && xLong >= Math.min(route.startLong, route.endLong)) {
-                    System.out.println("I appended shit to M[" +
-                            String.format("$%,.3f", xLong) + ", " + String.format("$%,.3f", j) + String.format("$%,d", k) + "]");
-                    increaseValue(j, xLong, k);
-                    }
-                }
+//            int minTime = (int) (route.startTime + (i * timeSlope));
+//            minTime = ((int) (minTime / TIME_STEP_SIZE)) * TIME_STEP_SIZE;
+//            int maxTime = (int) (route.startTime + ((i + STEP_SIZE) * timeSlope));
+
+            int k = 0;
+
+            for (double yLat = current_start_y;
+                 (directionLat == 1 && yLat <= rounded_current_stop_y + STEP_SIZE) ||
+                         (directionLat != 1 && yLat >= rounded_current_stop_y - STEP_SIZE);
+                 yLat += STEP_SIZE_VER) {
+//                if (j <= Math.max(route.startLat, route.endLat) && j >= Math.min(route.startLat, route.endLat) &&
+//                        xLong <= Math.max(route.startLong, route.endLong) && xLong >= Math.min(route.startLong, route.endLong)) {
+                double rounded_current_y = ((int)(yLat/STEP_SIZE))*STEP_SIZE;
+                System.out.println("I appended shit to M[" +
+                        String.format("$%,.3f", rounded_current_x) + ", " + String.format("$%,.3f", rounded_current_y) + ", "+String.format("$%,d", k) + "]");
+                increaseValue(yLat, xLong, k);
+
+//                for (int k = minTime; k <= maxTime; k += TIME_STEP_SIZE) {
+//                }
             }
         }
     }
+    /**
+     * Calculating the y for a formula y = a*x+b
+     * @param a, b, x
+     * @returns a*x+b
+     */
+    private double getYValue(double a, double b, double x){
+        return a*x+b;
+    }
+
+    /**
+     * Calculating the x value for a formula y = a*x+b
+     * @param a, b, y
+     * @returns (y-b)/a
+     */
+    private double getXValue(double a, double b, double y){
+        return (y-b)/a;
+    }
+
+
+
 
     /**
      * increase a value at given coordinate (in degrees/minutes)
