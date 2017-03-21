@@ -109,6 +109,7 @@ public class SpaceTimeCube {
         }
     }
 
+
     /**
      * @param numResults the number of cells that is returned
      * @return the greatest cells according to this statistics
@@ -119,6 +120,7 @@ public class SpaceTimeCube {
         double[][][] statisticValues = new double[values.length][values[0].length][values[0][0].length];
         for (int time = 0; time < values[0][0].length; time++) {
             int total = 0;
+            //calculate values and keep track of the total
             for (int longitude = 0; longitude < values.length; longitude++) {
                 for (int latitude = 0; latitude < values[longitude].length; latitude++) {
                     int statistic = customStatisticPerCell(latitude, longitude, time);
@@ -126,6 +128,7 @@ public class SpaceTimeCube {
                     total += statistic;
                 }
             }
+            //divide by total to get relative statistic per time step
             for (int longitude = 0; longitude < values.length; longitude++) {
                 for (int latitude = 0; latitude < values[longitude].length; latitude++) {
                     statisticValues[longitude][latitude][time] /= Math.max(total, 1);
@@ -146,6 +149,7 @@ public class SpaceTimeCube {
                     } else {
                         SpaceTimeCell smallestCell = null;
                         double smallestValue = Double.MAX_VALUE;
+                        //check if there is a larger value in the map
                         for (SpaceTimeCell cell : maxValueMap.keySet()) {
                             double value = statisticValues[cell.longitude][cell.latitude][cell.time];
                             if (value < smallestValue) {
@@ -180,4 +184,5 @@ public class SpaceTimeCube {
         result += 25 * values[longitude][latitude][time];
         return result;
     }
+
 }
