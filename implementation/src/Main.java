@@ -34,8 +34,6 @@ public class Main {
             }
 
             br.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
