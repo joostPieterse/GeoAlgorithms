@@ -1,4 +1,8 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import static java.lang.Math.abs;
+import static java.lang.Math.subtractExact;
 
 public class SpaceTimeCube {
 
@@ -14,8 +18,8 @@ public class SpaceTimeCube {
     private static final int TIME_STEP_SIZE = 60;
 
     public SpaceTimeCube() {
-        int longitude = (int) ((MAX_LONG - MIN_LONG) / STEP_SIZE);
-        int latitude = (int) ((MAX_LAT - MIN_LAT) / STEP_SIZE);
+        int longitude = (int) ((MAX_LONG - MIN_LONG) / STEP_SIZE) + 1;
+        int latitude = (int) ((MAX_LAT - MIN_LAT) / STEP_SIZE) + 1;
         this.values = new int[longitude][latitude][(int) (24 * 60 / TIME_STEP_SIZE)];
     }
 
@@ -98,9 +102,82 @@ public class SpaceTimeCube {
                 for (int k = 0; k < values[i][j].length; k++) {
                     if (values[i][j][k] > 0) {
                         System.out.println("[" + i + ", " + j + ", " + k + "] " + values[i][j][k]);
+
                     }
                 }
             }
         }
+    }
+
+    /**
+     * @param numResults the number of cells that is returned
+     * @return the greatest cells according to this statistics
+     */
+    public HashMap<SpaceTimeCell, Double> customStatistic(int numResults) {
+        System.out.println("Start calculating statistic");
+        //calculate values by looking at neighbours
+        double[][][] statisticValues = new double[values.length][values[0].length][values[0][0].length];
+        for (int time = 0; time < values[0][0].length; time++) {
+            int total = 0;
+            for (int longitude = 0; longitude < values.length; longitude++) {
+                for (int latitude = 0; latitude < values[longitude].length; latitude++) {
+                    int statistic = customStatisticPerCell(latitude, longitude, time);
+                    statisticValues[longitude][latitude][time] = statistic;
+                    total += statistic;
+                }
+            }
+            for (int longitude = 0; longitude < values.length; longitude++) {
+                for (int latitude = 0; latitude < values[longitude].length; latitude++) {
+                    statisticValues[longitude][latitude][time] /= Math.max(total, 1);
+                }
+            }
+        }
+        System.out.println("Done calculating statistic");
+        System.out.println("Start calculating max values");
+        HashMap<SpaceTimeCell, Double> maxValueMap = new HashMap<>();
+        for (int longitude = 0; longitude < statisticValues.length; longitude++) {
+            for (int latitude = 0; latitude < statisticValues[longitude].length; latitude++) {
+                for (int time = 0; time < statisticValues[longitude][latitude].length; time++) {
+                    double currentValue = statisticValues[longitude][latitude][time];
+                    SpaceTimeCell currentCell = new SpaceTimeCell(latitude, longitude, time);
+                    //add cell if the map is not yet full, check if it is larger than the smallest value in the map otherwise
+                    if (maxValueMap.size() < numResults) {
+                        maxValueMap.put(currentCell, (double) statisticValues[longitude][latitude][time]);
+                    } else {
+                        SpaceTimeCell smallestCell = null;
+                        double smallestValue = Double.MAX_VALUE;
+                        for (SpaceTimeCell cell : maxValueMap.keySet()) {
+                            double value = statisticValues[cell.longitude][cell.latitude][cell.time];
+                            if (value < smallestValue) {
+                                smallestCell = cell;
+                                smallestValue = value;
+                            }
+                        }
+                        if (currentValue > smallestValue) {
+                            maxValueMap.remove(smallestCell);
+                            maxValueMap.put(currentCell, (double) currentValue);
+                        }
+                    }
+                }
+            }
+        }
+        return maxValueMap;
+    }
+
+    private int customStatisticPerCell(int latitude, int longitude, int time) {
+        int result = 0;
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                for (int k = -1; k <= 1; k++) {
+                    if (longitude + i < values.length && longitude + i >= 0 &&
+                            latitude + j < values[longitude].length && latitude + j >= 0 &&
+                            time + k < values[longitude][latitude].length && time + k >= 0) {
+                        result += values[longitude + i][latitude + j][time + k];
+                    }
+                }
+            }
+        }
+        result += 25 * values[longitude][latitude][time];
+        return result;
     }
 }

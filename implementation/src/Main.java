@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 
 public class Main {
 
@@ -41,6 +42,17 @@ public class Main {
             br.close();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void testCustomStatistic(){
+        SpaceTimeCube spaceTimeCube = new SpaceTimeCube();
+        spaceTimeCube.addRoute(new Route(73.70014, 40.50014, 73.70234, 40.50601,100.0, 60, 180));
+        spaceTimeCube.printValues();
+        HashMap<SpaceTimeCell, Double> map = spaceTimeCube.customStatistic(4);
+        System.out.println("Printing statistic: ");
+        for(SpaceTimeCell cell:map.keySet()){
+            System.out.println("["+cell.longitude+", "+cell.latitude+", "+cell.time+"] "+map.get(cell));
         }
     }
 
