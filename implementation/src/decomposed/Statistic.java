@@ -38,25 +38,30 @@ public class Statistic {
         System.out.println("Start calculating statistic");
         AttributePlane[] planes = cube.planes;
         //calculate values by looking at neighbours
-        double[][][] statisticValues = new double[planes[0].getPlane()[0].length][planes[0].getPlane().length][planes.length];
+        int timeStepsPerDay = (int) (24 * 60 * 60 / cube.timeStep.getSeconds());
+        double[][][] statisticValues = new double[planes[0].getPlane()[0].length][planes[0].getPlane().length][timeStepsPerDay];
         for (int time = 0; time < planes.length; time++) {
             int total = 0;
             //calculate values and keep track of the total
             for (int longitude = 0; longitude < planes[time].getPlane()[0].length; longitude++) {
                 for (int latitude = 0; latitude < planes[time].getPlane().length; latitude++) {
                     int statistic = customStatisticPerCell(latitude, longitude, time);
-                    statisticValues[longitude][latitude][time] = statistic;
+                    statisticValues[longitude][latitude][time%timeStepsPerDay] += statistic;
                     total += statistic;
                 }
             }
             //divide by total to get relative statistic per time step
             for (int longitude = 0; longitude < planes[time].getPlane()[0].length; longitude++) {
                 for (int latitude = 0; latitude < planes[time].getPlane().length; latitude++) {
-                    statisticValues[longitude][latitude][time] /= Math.max(total, 1);
+                    statisticValues[longitude][latitude][time%timeStepsPerDay] /= Math.max(total, 1);
                 }
             }
         }
         System.out.println("Done calculating statistic");
+        return getMaxValues(statisticValues, numResults);
+    }
+
+    private HashMap<SpaceTimeCell, Double> getMaxValues(double[][][] statisticValues, int numResults) {
         System.out.println("Start calculating max values");
         HashMap<SpaceTimeCell, Double> maxValueMap = new HashMap<>();
         for (int longitude = 0; longitude < statisticValues.length; longitude++) {
@@ -88,4 +93,8 @@ public class Statistic {
         }
         return maxValueMap;
     }
+
+   /* public HashMap<SpaceTimeCell, Double> getisOrdStatistic(int numResults) {
+
+    }*/
 }
