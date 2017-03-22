@@ -33,7 +33,7 @@ public class Main {
                     LocalDateTime.of(2016, Month.FEBRUARY, 1, 0, 0),
                     Duration.ofHours(1));
             System.out.println("Loading file into space-time cube");
-            SpaceTimeCube.loadFromFile(cube, new File("data/yellow_tridata_2016-01_2000.csv"));
+            SpaceTimeCube.loadFromFile(cube, new File("data/yellow_tripdata_2016-01.csv"));
         } catch (FileNotFoundException ex) {
             ex.printStackTrace();
         }
