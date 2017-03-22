@@ -1,5 +1,8 @@
 package decomposed;
 
+import com.google.gson.Gson;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -13,6 +16,12 @@ public class Statistic {
     }
 
     private int customStatisticPerCell(int latitude, int longitude, int time) {
+        int result = neightbourSum(latitude, longitude, time);
+        result += 25 * cube.planes[time].getPlane()[latitude][longitude];
+        return result;
+    }
+
+    private int neightbourSum(int latitude, int longitude, int time) {
         int result = 0;
         AttributePlane[] planes = cube.planes;
         for (int i = -1; i <= 1; i++) {
@@ -26,7 +35,23 @@ public class Statistic {
                 }
             }
         }
-        result += 25 * planes[time].getPlane()[latitude][longitude];
+        return result;
+    }
+
+    private int neightbourSumSquared(int latitude, int longitude, int time) {
+        int result = 0;
+        AttributePlane[] planes = cube.planes;
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                for (int k = -1; k <= 1; k++) {
+                    if (longitude + i < planes[time].getPlane()[0].length && longitude + i >= 0 &&
+                            latitude + j < planes[time].getPlane().length && latitude + j >= 0 &&
+                            time + k < planes.length && time + k >= 0) {
+                        result += Math.pow(planes[time + k].getPlane()[latitude + j][longitude + i], 2);
+                    }
+                }
+            }
+        }
         return result;
     }
 
@@ -46,14 +71,14 @@ public class Statistic {
             for (int longitude = 0; longitude < planes[time].getPlane()[0].length; longitude++) {
                 for (int latitude = 0; latitude < planes[time].getPlane().length; latitude++) {
                     int statistic = customStatisticPerCell(latitude, longitude, time);
-                    statisticValues[longitude][latitude][time%timeStepsPerDay] += statistic;
+                    statisticValues[longitude][latitude][time % timeStepsPerDay] += statistic;
                     total += statistic;
                 }
             }
             //divide by total to get relative statistic per time step
             for (int longitude = 0; longitude < planes[time].getPlane()[0].length; longitude++) {
                 for (int latitude = 0; latitude < planes[time].getPlane().length; latitude++) {
-                    statisticValues[longitude][latitude][time%timeStepsPerDay] /= Math.max(total, 1);
+                    statisticValues[longitude][latitude][time % timeStepsPerDay] /= Math.max(total, 1);
                 }
             }
         }
@@ -94,7 +119,52 @@ public class Statistic {
         return maxValueMap;
     }
 
-   /* public HashMap<SpaceTimeCell, Double> getisOrdStatistic(int numResults) {
+    public HashMap<SpaceTimeCell, Double> getisOrdStatistic(int numResults) {
+        AttributePlane[] planes = cube.planes;
+        int timeStepsPerDay = (int) (24 * 60 * 60 / cube.timeStep.getSeconds());
+        double[][][] statisticValues = new double[planes[0].getPlane()[0].length][planes[0].getPlane().length][timeStepsPerDay];
+        int n = 27;
+        for (int time = 0; time < planes.length; time++) {
+            int total = 0;
+            //calculate values and keep track of the total
+            for (int longitude = 0; longitude < planes[time].getPlane()[0].length; longitude++) {
+                for (int latitude = 0; latitude < planes[time].getPlane().length; latitude++) {
+                    int statistic = customStatisticPerCell(latitude, longitude, time);
+                    statisticValues[longitude][latitude][time % timeStepsPerDay] += statistic;
+                    total += statistic;
+                }
+            }
+        }
+        System.out.println("Done calculating statistic");
+        return getMaxValues(statisticValues, numResults);
+    }
 
-    }*/
+    public String getJson(HashMap<SpaceTimeCell, Double> map) {
+        ArrayList<CellResult> resultArray = new ArrayList<>();
+        for (decomposed.SpaceTimeCell cell : map.keySet()) {
+            System.out.println("[" + cell.longitude + ", " + cell.latitude + ", " + cell.time + "] " + map.get(cell));
+            String lat = Double.toString(cell.latitude * Main.STEP_SIZE + cube.planes[0].area.bottomRightCorner.latitude);
+            String lng = "-" + Double.toString(cell.longitude * Main.STEP_SIZE + cube.planes[0].area.bottomRightCorner.longitude);
+            int time = cell.time;
+            double val = map.get(cell);
+            CellResult result = new CellResult(time, lat, lng, val);
+            resultArray.add(result);
+        }
+        String json = new Gson().toJson(resultArray);
+        return json;
+    }
+
+    private class CellResult {
+        int Time;
+        String Lat;
+        String Long;
+        double Value;
+
+        public CellResult(int time, String lat, String aLong, double value) {
+            Time = time;
+            Lat = lat;
+            Long = aLong;
+            Value = value;
+        }
+    }
 }
