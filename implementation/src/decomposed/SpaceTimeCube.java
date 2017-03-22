@@ -1,17 +1,24 @@
 
 package decomposed;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 /**
  *
  * @author s132054
  */
 public class SpaceTimeCube {
+    
+    static DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     
     LocalDateTime startTime;
     LocalDateTime endTime;
@@ -25,11 +32,14 @@ public class SpaceTimeCube {
         this.timeStep = timeStep;
         
         int height = 0;
+        System.out.println("Constructing space-time cube from " + startTime.format(dateTimeFormat)
+            + " to " + endTime.format(dateTimeFormat));
         LocalDateTime checkTime = startTime;
-        while (startTime.isBefore(endTime)) {
+        while (checkTime.isBefore(endTime)) {
             checkTime = checkTime.plus(timeStep);
             height++;
         }
+        System.out.println("Height of cube: " + height);
         planes = new AttributePlane[height];
         for (int i = 0; i < height; i++) {
             planes[i] = new AttributePlane(area, steps);
@@ -59,14 +69,24 @@ public class SpaceTimeCube {
     public void addTimedRoute(TimedRoute route) {
         int startPlaneID = getPlaneIDForTime(route.startTime);
         int endPlaneID = getPlaneIDForTime(route.endTime);
+        System.out.println("TimedRoute crosses " + (endPlaneID - startPlaneID) + " planes");
         for (int plane = startPlaneID; plane <= endPlaneID; plane++) {
             LocalDateTime planeStartTime = getStartTimeForPlaneID(plane);
             planes[plane].incrementContainingCells(route.subRouteInTimespan(planeStartTime, planeStartTime.plus(timeStep), ChronoUnit.SECONDS));
         }
     }
     
-    public static SpaceTimeCube loadFromFile(File file) {
-        //TODO implement csv parser for line->TimedRoute conversion (LocalDateTime)
+    public static SpaceTimeCube loadFromFile(SpaceTimeCube cube, File file) throws FileNotFoundException {
+        BufferedReader reader = new BufferedReader(new FileReader(file));
+        reader.lines().forEach((line)->{
+            try {
+                TimedRoute route = TimedRoute.parseLine(line);
+                cube.addTimedRoute(route);
+            } catch (NumberFormatException | java.time.format.DateTimeParseException ex) {
+                System.out.println("skipping unparsable line: ");
+                ex.printStackTrace(System.out);
+            }
+        });
         return null;
     }
 }

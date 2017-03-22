@@ -42,4 +42,9 @@ public class Area {
     public RelativeLocation getSize() {
         return RelativeLocation.getRelativeLocation(bottomRightCorner, topLeftCorner);
     }
+    
+    @Override
+    public String toString() {
+        return "(" + bottomRightCorner + "; " + topLeftCorner + ")";
+    }
 }

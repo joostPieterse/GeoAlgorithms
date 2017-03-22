@@ -8,8 +8,8 @@ public class SpaceTimeCube {
 
     private int[][][] values;
     //in degrees
-    private static final double MIN_LONG = 73.7;
-    private static final double MAX_LONG = 74.25;
+    private static final double MAX_LONG = -73.7;
+    private static final double MIN_LONG = -74.25;
     private static final double MIN_LAT = 40.5;
     private static final double MAX_LAT = 40.9;
     private static final double STEP_SIZE = 0.001;

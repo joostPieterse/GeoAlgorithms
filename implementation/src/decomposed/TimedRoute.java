@@ -3,6 +3,7 @@ package decomposed;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
 /**
@@ -38,14 +39,37 @@ public class TimedRoute extends Route{
     }
     
     public Route subRouteInTimespan(LocalDateTime start, LocalDateTime end, ChronoUnit precision) {
-        if (!timeContained(start) || !timeContained(end))
-            throw new ContainmentException("Queried time range not contained in route time");
+        System.out.println("Subroute of TimedRoute " + this + " in time interval " 
+                + start.format(SpaceTimeCube.dateTimeFormat) + "~" + end.format(SpaceTimeCube.dateTimeFormat));
         if (!end.isAfter(start))
             throw new RangeException("Invalid time range given");
-        return new Route(
+        if (start.isBefore(this.startTime)) {
+            start = this.startTime;
+        }
+        if (end.isAfter(this.endTime)) {
+            end = this.endTime;
+        }
+        Route result = new Route(
                 interpolateTime(start, precision),
                 interpolateTime(end, precision)
         );
+        System.out.println("Resulting route: " + result);
+        return result;
+    }
+    
+    public static TimedRoute parseLine(String line) throws NumberFormatException, java.time.format.DateTimeParseException {
+        System.out.println("Parsing line: " + line);
+        String[] columns = line.split(",");
+        System.out.println("Important values: " + columns[1] + ", " + columns[2] + ", " + columns[5] + ", " + columns[6] + ", " + columns[9] + ", " + columns[10]);
+        LocalDateTime startTime = LocalDateTime.parse(columns[1], SpaceTimeCube.dateTimeFormat);
+        LocalDateTime endTime = LocalDateTime.parse(columns[2], SpaceTimeCube.dateTimeFormat);
+        Location startLocation = new Location(Double.parseDouble(columns[6]), Double.parseDouble(columns[5]));
+        Location endLocation = new Location(Double.parseDouble(columns[10]), Double.parseDouble(columns[9]));
+        System.out.println("Created variables: startTime=" + startTime.format(SpaceTimeCube.dateTimeFormat) 
+                + " endTime=" + endTime.format(SpaceTimeCube.dateTimeFormat)
+                + " startLocation=" + startLocation
+                + " endLocation=" + endLocation);
+        return new TimedRoute(startLocation, endLocation, startTime, endTime);
     }
     
     
@@ -55,4 +79,11 @@ public class TimedRoute extends Route{
             super(message);
         }
     }
+
+    @Override
+    public String toString() {
+        return "{" + startTime.format(SpaceTimeCube.dateTimeFormat) + ": " + start 
+                + ", " + endTime.format(SpaceTimeCube.dateTimeFormat) + ": " + end + "}";
+    }
+    
 }

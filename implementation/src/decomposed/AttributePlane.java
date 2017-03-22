@@ -22,7 +22,7 @@ public class AttributePlane {
     
     private Cell getCellFromLocation(Location location) {
         if (!area.contains(location))
-            throw new ContainmentException("Location not contained in area bounds");
+            throw new ContainmentException("Location " + location + " not contained in area bounds " + area);
         RelativeLocation dBottomRight = RelativeLocation.getRelativeLocation(area.bottomRightCorner, location);
         int lat = (int) Math.floor(dBottomRight.dLatitude / steps.dLatitude);
         int lng = (int) Math.floor(dBottomRight.dLongitude / steps.dLongitude);

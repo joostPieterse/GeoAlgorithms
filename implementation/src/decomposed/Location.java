@@ -18,4 +18,9 @@ public class Location{
     public Location addInterpolatedRelative(RelativeLocation rel, double interpolate) {
         return new Location(latitude + interpolate * rel.dLatitude, longitude + interpolate * rel.dLongitude);
     }
+    
+    @Override
+    public String toString() {
+        return "(" + longitude + ", " + latitude + ")";
+    }
 }
