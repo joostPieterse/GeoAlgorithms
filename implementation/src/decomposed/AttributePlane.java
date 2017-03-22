@@ -49,7 +49,7 @@ public class AttributePlane {
     
     public void incrementContainingCells(Route route) {
         Cell startCell = getCellFromLocation(route.start);
-        System.out.println("Found cell " + startCell + " with area " + getAreaFromCell(startCell) + " for route " + route);
+        //System.out.println("Found cell " + startCell + " with area " + getAreaFromCell(startCell) + " for route " + route);
         plane[startCell.lat][startCell.lng]++;
         ArrayList<Cell> passed = new ArrayList<>();
         passed.add(startCell);

@@ -20,6 +20,7 @@ public class SpaceTimeCube {
     
     static DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     
+    Area area;
     LocalDateTime startTime;
     LocalDateTime endTime;
     Duration timeStep;
@@ -27,6 +28,7 @@ public class SpaceTimeCube {
     AttributePlane[] planes;
 
     public SpaceTimeCube(Area area, RelativeLocation steps, LocalDateTime startTime, LocalDateTime endTime, Duration timeStep) {
+        this.area = area;
         this.startTime = startTime;
         this.endTime = endTime;
         this.timeStep = timeStep;
@@ -51,7 +53,7 @@ public class SpaceTimeCube {
     }
     
     private int getPlaneIDForTime(LocalDateTime time) {
-        System.out.println("Getting plane for time " + time.format(dateTimeFormat));
+        //System.out.println("Getting plane for time " + time.format(dateTimeFormat));
         if (time.isBefore(startTime) || time.isAfter(endTime)) 
             throw new ContainmentException("Time is not contained in Spacetime cube");
         int requiredPlane = 0;
@@ -60,7 +62,7 @@ public class SpaceTimeCube {
             checkTime = checkTime.plus(timeStep);
             requiredPlane++;
         }
-        System.out.println("Plane=" + requiredPlane);
+        //System.out.println("Plane=" + requiredPlane);
         return requiredPlane;
     }
     
@@ -69,12 +71,14 @@ public class SpaceTimeCube {
     }
     
     public void addTimedRoute(TimedRoute route) {
-        int startPlaneID = getPlaneIDForTime(route.startTime);
-        int endPlaneID = getPlaneIDForTime(route.endTime);
-        System.out.println("TimedRoute crosses " + (endPlaneID - startPlaneID) + " planes");
-        for (int plane = startPlaneID; plane <= endPlaneID; plane++) {
-            LocalDateTime planeStartTime = getStartTimeForPlaneID(plane);
-            planes[plane].incrementContainingCells(route.subRouteInTimespan(planeStartTime, planeStartTime.plus(timeStep), ChronoUnit.SECONDS));
+        if (area.contains(route.start) && area.contains(route.end)) {
+            int startPlaneID = getPlaneIDForTime(route.startTime);
+            int endPlaneID = getPlaneIDForTime(route.endTime);
+            //System.out.println("TimedRoute crosses " + (endPlaneID - startPlaneID) + " planes");
+            for (int plane = startPlaneID; plane <= endPlaneID; plane++) {
+                LocalDateTime planeStartTime = getStartTimeForPlaneID(plane);
+                planes[plane].incrementContainingCells(route.subRouteInTimespan(planeStartTime, planeStartTime.plus(timeStep), ChronoUnit.SECONDS));
+            }
         }
     }
     
