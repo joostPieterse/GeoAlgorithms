@@ -59,7 +59,7 @@ public class TimedRoute extends Route{
     }
     
     public static TimedRoute parseLine(String line) throws NumberFormatException, java.time.format.DateTimeParseException, IllegalArgumentException {
-        System.out.println("Parsing line: " + line);
+        //System.out.println("Parsing line: " + line);
         String[] columns = line.split(",");
         //System.out.println("Important values: " + columns[1] + ", " + columns[2] + ", " + columns[5] + ", " + columns[6] + ", " + columns[9] + ", " + columns[10]);
         LocalDateTime startTime = LocalDateTime.parse(columns[1], SpaceTimeCube.dateTimeFormat);
