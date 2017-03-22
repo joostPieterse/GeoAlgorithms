@@ -14,11 +14,20 @@ public class TimedRoute extends Route{
     
     LocalDateTime startTime;
     LocalDateTime endTime;
+    double tripDistance;
 
+    public TimedRoute(Location start, Location end, double tripDistance, LocalDateTime startTime, LocalDateTime endTime) {
+        super(start, end);
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.tripDistance = tripDistance;
+    }
+    
     public TimedRoute(Location start, Location end, LocalDateTime startTime, LocalDateTime endTime) {
         super(start, end);
         this.startTime = startTime;
         this.endTime = endTime;
+        this.tripDistance = getDistanceInMiles();
     }
     
     public Duration getPeriod() {
@@ -61,7 +70,7 @@ public class TimedRoute extends Route{
     public static TimedRoute parseLine(String line) throws NumberFormatException, java.time.format.DateTimeParseException, IllegalArgumentException {
         //System.out.println("Parsing line: " + line);
         String[] columns = line.split(",");
-        //System.out.println("Important values: " + columns[1] + ", " + columns[2] + ", " + columns[5] + ", " + columns[6] + ", " + columns[9] + ", " + columns[10]);
+        //System.out.println("Important values: " + columns[1] + ", " + columns[2] + ", " + columns[4] + ", " + columns[5] + ", " + columns[6] + ", " + columns[9] + ", " + columns[10]);
         LocalDateTime startTime = LocalDateTime.parse(columns[1], SpaceTimeCube.dateTimeFormat);
         LocalDateTime endTime = LocalDateTime.parse(columns[2], SpaceTimeCube.dateTimeFormat);
         if (startTime.until(endTime, ChronoUnit.SECONDS) == 0) 
@@ -71,11 +80,13 @@ public class TimedRoute extends Route{
         if (startLocation.latitude == 0 || startLocation.longitude == 0 ||
                 endLocation.latitude == 0 || endLocation.longitude == 0)
             throw new IllegalArgumentException("Invalid location found during parsing");
+        double tripDistance = Double.parseDouble(columns[4]);
         //System.out.println("Created variables: startTime=" + startTime.format(SpaceTimeCube.dateTimeFormat) 
         //        + " endTime=" + endTime.format(SpaceTimeCube.dateTimeFormat)
         //        + " startLocation=" + startLocation
         //        + " endLocation=" + endLocation);
-        return new TimedRoute(startLocation, endLocation, startTime, endTime);
+        TimedRoute result = new TimedRoute(startLocation, endLocation, tripDistance, startTime, endTime);
+        return result;
     }
     
     

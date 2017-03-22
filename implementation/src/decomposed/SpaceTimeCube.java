@@ -75,16 +75,22 @@ public class SpaceTimeCube {
             int startPlaneID = getPlaneIDForTime(route.startTime);
             int endPlaneID = getPlaneIDForTime(route.endTime);
             //System.out.println("TimedRoute crosses " + (endPlaneID - startPlaneID) + " planes");
-            for (int plane = startPlaneID; plane <= endPlaneID; plane++) {
-                LocalDateTime planeStartTime = getStartTimeForPlaneID(plane);
-                planes[plane].incrementContainingCells(route.subRouteInTimespan(planeStartTime, planeStartTime.plus(timeStep), ChronoUnit.SECONDS));
+            if (route.tripDistance < 2 * route.getDistanceInMiles()) {
+                for (int plane = startPlaneID; plane <= endPlaneID; plane++) {
+                    LocalDateTime planeStartTime = getStartTimeForPlaneID(plane);
+                    planes[plane].incrementContainingCells(route.subRouteInTimespan(planeStartTime, planeStartTime.plus(timeStep), ChronoUnit.SECONDS));
+                }
+            } else {
+                planes[startPlaneID].incrAttributeAtLocation(route.start);
+                planes[endPlaneID].incrAttributeAtLocation(route.end);
             }
         }
     }
     
     public static SpaceTimeCube loadFromFile(SpaceTimeCube cube, File file) throws FileNotFoundException {
         BufferedReader reader = new BufferedReader(new FileReader(file));
-        int linenr = 0;
+        final IntContainer linenr = new IntContainer(0);
+        final IntContainer errnr = new IntContainer(0);
         reader.lines().forEach((line)->{
             try {
                 TimedRoute route = TimedRoute.parseLine(line);
@@ -93,11 +99,30 @@ public class SpaceTimeCube {
                     cube.addTimedRoute(route);
                 }
             } catch (java.time.format.DateTimeParseException | IllegalArgumentException ex) {
-                System.out.println("skipping unparsable line: " + ex.getMessage());
+                if (errnr.increment() % 1000 == 0) System.out.print("-");
             } finally {
-                linenr++;
+                if (linenr.increment() % 1000 == 0) System.out.print(".");
+                if (linenr.get() % 100000 == 0) System.out.println(linenr.get()+":"+errnr.get());
             }
         });
-        return null;
+        System.out.println("Lines read: " + linenr.get());
+        System.out.println("Lines skipped: " + errnr.get());
+        return cube;
+    }
+    
+    private static class IntContainer {
+        int i;
+
+        public IntContainer(int i) {
+            this.i = i;
+        }
+        
+        int increment() {
+            return ++i;
+        }
+        
+        int get() {
+            return i;
+        }
     }
 }

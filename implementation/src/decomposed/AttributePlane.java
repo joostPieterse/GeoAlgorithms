@@ -42,6 +42,11 @@ public class AttributePlane {
         return plane[c.lat][c.lng];
     }
     
+    public int incrAttributeAtLocation(Location location) {
+        Cell c = getCellFromLocation(location);
+        return ++plane[c.lat][c.lng];
+    }
+    
     public void setAtributeAtLocation(Location location, int value) {
         Cell c = getCellFromLocation(location);
         plane[c.lat][c.lng] = value;
