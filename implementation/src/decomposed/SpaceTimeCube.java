@@ -84,12 +84,18 @@ public class SpaceTimeCube {
     
     public static SpaceTimeCube loadFromFile(SpaceTimeCube cube, File file) throws FileNotFoundException {
         BufferedReader reader = new BufferedReader(new FileReader(file));
+        int linenr = 0;
         reader.lines().forEach((line)->{
             try {
                 TimedRoute route = TimedRoute.parseLine(line);
-                cube.addTimedRoute(route);
+                if ((cube.startTime.isEqual(route.startTime) || cube.startTime.isBefore(route.startTime)) && 
+                    (cube.endTime.isEqual(route.endTime) || cube.endTime.isAfter(route.endTime))) {
+                    cube.addTimedRoute(route);
+                }
             } catch (java.time.format.DateTimeParseException | IllegalArgumentException ex) {
                 System.out.println("skipping unparsable line: " + ex.getMessage());
+            } finally {
+                linenr++;
             }
         });
         return null;
