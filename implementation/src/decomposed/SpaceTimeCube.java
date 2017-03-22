@@ -51,6 +51,7 @@ public class SpaceTimeCube {
     }
     
     private int getPlaneIDForTime(LocalDateTime time) {
+        System.out.println("Getting plane for time " + time.format(dateTimeFormat));
         if (time.isBefore(startTime) || time.isAfter(endTime)) 
             throw new ContainmentException("Time is not contained in Spacetime cube");
         int requiredPlane = 0;
@@ -59,6 +60,7 @@ public class SpaceTimeCube {
             checkTime = checkTime.plus(timeStep);
             requiredPlane++;
         }
+        System.out.println("Plane=" + requiredPlane);
         return requiredPlane;
     }
     
@@ -82,9 +84,8 @@ public class SpaceTimeCube {
             try {
                 TimedRoute route = TimedRoute.parseLine(line);
                 cube.addTimedRoute(route);
-            } catch (NumberFormatException | java.time.format.DateTimeParseException ex) {
-                System.out.println("skipping unparsable line: ");
-                ex.printStackTrace(System.out);
+            } catch (java.time.format.DateTimeParseException | IllegalArgumentException ex) {
+                System.out.println("skipping unparsable line: " + ex.getMessage());
             }
         });
         return null;

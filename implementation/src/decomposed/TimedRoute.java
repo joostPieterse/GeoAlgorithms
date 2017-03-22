@@ -35,6 +35,7 @@ public class TimedRoute extends Route{
         double startToTime = startTime.until(time, precision);
         double timeToEnd = time.until(endTime, precision);
         double interpolation = startToTime / (startToTime + timeToEnd);
+        System.out.println("interpolation times: start=" + startToTime + " end=" + timeToEnd + " interpolation value=" + interpolation);
         return interpolateFraction(interpolation);
     }
     
@@ -57,14 +58,19 @@ public class TimedRoute extends Route{
         return result;
     }
     
-    public static TimedRoute parseLine(String line) throws NumberFormatException, java.time.format.DateTimeParseException {
+    public static TimedRoute parseLine(String line) throws NumberFormatException, java.time.format.DateTimeParseException, IllegalArgumentException {
         System.out.println("Parsing line: " + line);
         String[] columns = line.split(",");
         System.out.println("Important values: " + columns[1] + ", " + columns[2] + ", " + columns[5] + ", " + columns[6] + ", " + columns[9] + ", " + columns[10]);
         LocalDateTime startTime = LocalDateTime.parse(columns[1], SpaceTimeCube.dateTimeFormat);
         LocalDateTime endTime = LocalDateTime.parse(columns[2], SpaceTimeCube.dateTimeFormat);
+        if (startTime.until(endTime, ChronoUnit.SECONDS) == 0) 
+            throw new IllegalArgumentException("No time passes during route");
         Location startLocation = new Location(Double.parseDouble(columns[6]), Double.parseDouble(columns[5]));
         Location endLocation = new Location(Double.parseDouble(columns[10]), Double.parseDouble(columns[9]));
+        if (startLocation.latitude == 0 || startLocation.longitude == 0 ||
+                endLocation.latitude == 0 || endLocation.longitude == 0)
+            throw new IllegalArgumentException("Invalid location found during parsing");
         System.out.println("Created variables: startTime=" + startTime.format(SpaceTimeCube.dateTimeFormat) 
                 + " endTime=" + endTime.format(SpaceTimeCube.dateTimeFormat)
                 + " startLocation=" + startLocation

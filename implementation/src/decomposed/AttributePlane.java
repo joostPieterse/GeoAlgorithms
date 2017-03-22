@@ -52,18 +52,20 @@ public class AttributePlane {
         plane[startCell.lat][startCell.lng]++;
         ArrayList<Cell> passed = new ArrayList<>();
         passed.add(startCell);
-        incrementNeighboursRecursive(route, startCell, passed);
+        incrementNeighboursRecursive(route, startCell, passed, 0);
     }
     
-    public void incrementNeighboursRecursive(Route route, Cell cell, ArrayList<Cell> passed) {
+    public void incrementNeighboursRecursive(Route route, Cell cell, ArrayList<Cell> passed, int iteration) {
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
                 final Cell checkCell = cell.delta(i, j);
-                if (!passed.stream().anyMatch((c)->c.equals(checkCell))) {
+                if (!passed.stream().anyMatch((c)->c.equals(checkCell)) 
+                        && 0 <= checkCell.lat && checkCell.lat < plane.length && 0 <= checkCell.lng && checkCell.lng < plane[0].length) {
                     if (route.intersectsWithArea(getAreaFromCell(checkCell))) {
+                        System.out.println("Checking cell " + checkCell + " in iteration " + iteration);
                         plane[checkCell.lat][checkCell.lng]++;
                         passed.add(checkCell);
-                        incrementNeighboursRecursive(route, checkCell, passed);
+                        incrementNeighboursRecursive(route, checkCell, passed, iteration + 1);
                     }
                 }
             }
@@ -84,6 +86,11 @@ public class AttributePlane {
 
         public boolean equals(Cell cell) {
             return lat == cell.lat && lng == cell.lng;
+        }
+
+        @Override
+        public String toString() {
+            return "<"+lat+","+lng+">";
         }
     }
 }
