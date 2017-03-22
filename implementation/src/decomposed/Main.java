@@ -7,6 +7,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.Year;
+import java.util.HashMap;
 
 /**
  *
@@ -35,6 +36,23 @@ public class Main {
             SpaceTimeCube.loadFromFile(cube, new File("data/yellow_tripdata_2016-01.csv"));
         } catch (FileNotFoundException ex) {
             ex.printStackTrace();
+        }
+    }
+    
+    private void testDecomposedStatistic(){
+        Area area = new Area(new Location(40.9, 74.25), new Location(40.5, 73.7));
+        RelativeLocation relativeLocation = new RelativeLocation(0.001, 0.001);
+        LocalDateTime startTime = LocalDateTime.of(2017, 3,22,0,0);
+        LocalDateTime endTime = LocalDateTime.of(2017, 3,22,23,59);
+        Duration timeStep = Duration.ofMinutes(60);
+        decomposed.SpaceTimeCube cube = new decomposed.SpaceTimeCube(area, relativeLocation, startTime, endTime, timeStep);
+        TimedRoute route = new TimedRoute(new Location(40.78, 74.0), new Location(40.78, 74.1), LocalDateTime.of(2017, 3,22,10,5), LocalDateTime.of(2017, 3,22,11,5));
+        cube.addTimedRoute(route);
+        Statistic statistic = new Statistic(cube);
+        HashMap<SpaceTimeCell, Double> map = statistic.customStatistic(4);
+        System.out.println("Printing statistic: ");
+        for (decomposed.SpaceTimeCell cell : map.keySet()) {
+            System.out.println("[" + cell.longitude + ", " + cell.latitude + ", " + cell.time + "] " + map.get(cell));
         }
     }
     
