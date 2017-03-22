@@ -1,4 +1,5 @@
 import static java.lang.Math.abs;
+import static java.lang.Math.sqrt;
 
 public class SpaceTimeCube {
 
@@ -33,18 +34,7 @@ public class SpaceTimeCube {
                 " StartTime: "+route.startTime+" EndTime: "+route.endTime);
 
         // Start out by rounding all variables as we won't use non-rounded.
-        double startLong = ((int) (route.startLong / STEP_SIZE))*STEP_SIZE;
         double endLong = ((int) (route.endLong / STEP_SIZE))*STEP_SIZE;
-        double startLat = ((int) (route.startLat / STEP_SIZE))*STEP_SIZE;
-        double endLat = ((int) (route.endLat / STEP_SIZE))*STEP_SIZE;
-
-        // Specifying time
-        int startTime = route.startTime;
-        int endTime = route.endTime;
-        int difTime = route.endTime - route.startTime;
-        if (difTime < 0) {
-            difTime += 60 * 24;
-        }
 
         // Calculating the differences and which direction the cab went.
         double difLong = route.endLong - route.startLong;
@@ -52,6 +42,17 @@ public class SpaceTimeCube {
 
         double directionLong = Math.signum(route.endLong - route.startLong);
         double directionLat = Math.signum(route.endLat - route.startLat);
+
+        // Specifying time
+        int startTime = route.startTime;
+        int currentTime = route.startTime;
+        int endTime = route.endTime;
+        int difTime = route.endTime - route.startTime;
+        if (difTime < 0) {
+            difTime += 60 * 24;
+        }
+        double PositionDifPerTimeStap = TIME_STEP_SIZE * Math.sqrt(Math.pow(difLat, 2.0)+Math.pow(difLat, 2.0)) / difTime;
+        double timeDifPerMovement = difTime / Math.sqrt(Math.pow(difLat, 2.0)+Math.pow(difLat, 2.0));
 
         // Step sizes. Whether they should be positive or negative.
         double STEP_SIZE_HOR = STEP_SIZE;
@@ -113,9 +114,6 @@ public class SpaceTimeCube {
             }
             double rounded_current_stop_y = ((int)(current_stop_y/STEP_SIZE))*STEP_SIZE;
 
-//            int minTime = (int) (route.startTime + (i * timeSlope));
-//            minTime = ((int) (minTime / TIME_STEP_SIZE)) * TIME_STEP_SIZE;
-//            int maxTime = (int) (route.startTime + ((i + STEP_SIZE) * timeSlope));
 
             int k = 0;
             System.out.println("---------------------------------------------- NEW LINE ----------------------------------------");
@@ -126,17 +124,26 @@ public class SpaceTimeCube {
                  ((directionLat == 1 && yLat <= rounded_current_stop_y + STEP_SIZE) ||
                          (directionLat != 1 && yLat >= rounded_current_stop_y)) &&
                          (yLat >= MIN_LAT  && yLat < MAX_LAT);
-                 yLat += STEP_SIZE_VER) {
-//                if (j <= Math.max(route.startLat, route.endLat) && j >= Math.min(route.startLat, route.endLat) &&
-//                        xLong <= Math.max(route.startLong, route.endLong) && xLong >= Math.min(route.startLong, route.endLong)) {
+                 yLat += STEP_SIZE_VER)
+            {
                 double rounded_current_y = ((int)(yLat/STEP_SIZE))*STEP_SIZE;
-                System.out.println("M[" +
-                        String.format("$%,.3f", rounded_current_x) + ", " + String.format("$%,.3f", rounded_current_y) + ", "+String.format("$%,d", k) + "]");
 
-                increaseValue(yLat, xLong, k);
+                System.out.println("M[" + String.format("%,.3f", rounded_current_x) + ", "
+                        + String.format("%,.3f", rounded_current_y)
+                        + ", "+String.format("%,.3f", 0.0) + "]");
 
-//                for (int k = minTime; k <= maxTime; k += TIME_STEP_SIZE) {
-//                }
+                double maxTimeForInterval;
+                //Math.sqrt(Math.pow(difLat, 2.0)+Math.pow(difLat, 2.0))
+                maxTimeForInterval = abs(yLat + STEP_SIZE_VER - route.startLat)*timeDifPerMovement;
+                System.out.println("TimeDifPerMovement "+timeDifPerMovement);
+                for(double yCurrentTime = abs(current_start_y-route.startLat)*timeDifPerMovement;
+                    ((directionLat == 1 && yCurrentTime <= maxTimeForInterval)
+                        || (directionLat != 1 && yCurrentTime >= maxTimeForInterval));
+                    yCurrentTime += timeDifPerMovement)
+                {
+
+                    increaseValue(yLat, xLong, (int) yCurrentTime);
+                }
             }
         }
     }
