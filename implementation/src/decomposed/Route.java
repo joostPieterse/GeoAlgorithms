@@ -29,10 +29,13 @@ public class Route {
     
     public boolean intersectsWithArea(Area area) {
         if (area.contains(start) || area.contains(end)) {
+            //System.out.println(this + " intersects with " + area + "; point envelopped");
             return true;
         } else {
             return Arrays.stream(area.getBoundaryRoutes()).anyMatch((route)->{
-                return this.intersectsWithRoute(route);
+                boolean result = this.intersectsWithRoute(route);
+                //if (result) System.out.println(this + " intersects with " + area + "; boundary " + route);
+                return result;
             });
         }
     }

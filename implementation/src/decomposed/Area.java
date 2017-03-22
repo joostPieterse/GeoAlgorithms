@@ -20,8 +20,8 @@ public class Area {
     }
     
     public Route[] getBoundaryRoutes() {
-        Location bottomLeftCorner = new Location(topLeftCorner.latitude, bottomRightCorner.longitude);
-        Location topRightCorner = new Location(bottomLeftCorner.latitude, topLeftCorner.longitude);
+        Location topRightCorner = new Location(topLeftCorner.latitude, bottomRightCorner.longitude);
+        Location bottomLeftCorner = new Location(bottomRightCorner.latitude, topLeftCorner.longitude);
         return new Route[]{
             new Route(topLeftCorner, topRightCorner),
             new Route(bottomLeftCorner, bottomRightCorner),

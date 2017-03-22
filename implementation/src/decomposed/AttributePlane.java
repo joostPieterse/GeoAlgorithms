@@ -49,10 +49,15 @@ public class AttributePlane {
     
     public void incrementContainingCells(Route route) {
         Cell startCell = getCellFromLocation(route.start);
+        System.out.println("Found cell " + startCell + " with area " + getAreaFromCell(startCell) + " for route " + route);
         plane[startCell.lat][startCell.lng]++;
         ArrayList<Cell> passed = new ArrayList<>();
         passed.add(startCell);
         incrementNeighboursRecursive(route, startCell, passed, 0);
+    }
+    
+    public int[][] getPlane() {
+        return plane;
     }
     
     public void incrementNeighboursRecursive(Route route, Cell cell, ArrayList<Cell> passed, int iteration) {
@@ -62,7 +67,7 @@ public class AttributePlane {
                 if (!passed.stream().anyMatch((c)->c.equals(checkCell)) 
                         && 0 <= checkCell.lat && checkCell.lat < plane.length && 0 <= checkCell.lng && checkCell.lng < plane[0].length) {
                     if (route.intersectsWithArea(getAreaFromCell(checkCell))) {
-                        System.out.println("Checking cell " + checkCell + " in iteration " + iteration);
+                        //System.out.println("Checking cell " + checkCell + " with area " + getAreaFromCell(checkCell) + "  in iteration " + iteration);
                         plane[checkCell.lat][checkCell.lng]++;
                         passed.add(checkCell);
                         incrementNeighboursRecursive(route, checkCell, passed, iteration + 1);
