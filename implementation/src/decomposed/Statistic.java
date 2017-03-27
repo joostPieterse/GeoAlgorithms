@@ -1,11 +1,19 @@
 package decomposed;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.stream.JsonWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * Created by s130604 on 22-3-2017.
@@ -91,11 +99,15 @@ public class Statistic {
             statisticNormal.put(e.getKey(), (double) e.getValue() / (double) maxs.get(e.getKey().getTimeLocation()));
         }
         
-        //retrieve 50 cells with largest statistic
+        //retrieve x cells with largest statistic
         System.out.println("Retrieving top " + numResults + " cells");
-        return statisticNormal.entrySet().stream().sorted((a, b)->{
+        Stream<Map.Entry<SpaceTimeCube.SpaceTimeCell, Double>> stream = statisticNormal.entrySet().stream().sorted((a, b)->{
             return Double.compare(b.getValue(), a.getValue());
-        }).limit(numResults).collect(Collectors.toMap(Map.Entry::getKey, e->{
+        }).filter(e->e.getValue() > 0);
+        if (numResults > 0) {
+            stream = stream.limit(numResults);
+        }
+        return stream.collect(Collectors.toMap(Map.Entry::getKey, e->{
             return (double) e.getValue();
         }));
     }
@@ -135,30 +147,24 @@ public class Statistic {
     }
     */
 
-    public HashMap<SpaceTimeCube.SpaceTimeCell, Double> getisOrdStatistic(int numResults) {
-        /*
-        AttributePlane[] planes = cube.planes;
-        int timeStepsPerDay = (int) (24 * 60 * 60 / cube.timeStep.getSeconds());
-        double[][][] statisticValues = new double[planes[0].getPlane()[0].length][planes[0].getPlane().length][timeStepsPerDay];
-        int n = 27;
-        for (int time = 0; time < planes.length; time++) {
-            int total = 0;
-            //calculate values and keep track of the total
-            for (int longitude = 0; longitude < planes[time].getPlane()[0].length; longitude++) {
-                for (int latitude = 0; latitude < planes[time].getPlane().length; latitude++) {
-                    int statistic = customStatisticPerCell(latitude, longitude, time);
-                    statisticValues[longitude][latitude][time % timeStepsPerDay] += statistic;
-                    total += statistic;
-                }
-            }
+    public Map<SpaceTimeCube.SpaceTimeCell, Double> getisOrdStatistic(int numResults) {
+        Map<SpaceTimeCube.SpaceTimeCell, Double> Xbar = new HashMap<>();
+        for (SpaceTimeCube.SpaceTimeCell cell : cube) {
+            int sum = cube.getNeighbours(cell).stream().collect(Collectors.reducing(0, c->c.cell.getValue(), Integer::sum));
+            Xbar.put(cell, sum / 27.0);
         }
-        System.out.println("Done calculating statistic");
-        return getMaxValues(statisticValues, numResults);
-        */
+        Map<SpaceTimeCube.SpaceTimeCell, Double> XbarSqrt = Xbar.entrySet().stream().collect(Collectors.toMap(e->e.getKey(), e->Math.pow(e.getValue(), 2)));
+        Map<SpaceTimeCube.SpaceTimeCell, Double> S = new HashMap<>();
+        for (SpaceTimeCube.SpaceTimeCell cell : cube) {
+            int sum = cube.getNeighbours(cell).stream().collect(Collectors.reducing(0, c->(int) Math.pow(c.cell.getValue(), 2), Integer::sum));
+            Xbar.put(cell, Math.sqrt((sum / 27.0) - XbarSqrt.get(cell)));
+        }
+        //always 0...?
+        
         return new HashMap<>();
     }
 
-    public String getJson(Map<SpaceTimeCube.SpaceTimeCell, Double> map) {
+    public void getJson(Map<SpaceTimeCube.SpaceTimeCell, Double> map) {
         ArrayList<CellResult> resultArray = new ArrayList<>();
         for (SpaceTimeCube.SpaceTimeCell cell : map.keySet()) {
             System.out.println("[" + cell.cell.getCenter().longitude + ", " + cell.cell.getCenter().latitude + ", " + cell.getTimeLocation() + "] " + map.get(cell));
@@ -169,8 +175,13 @@ public class Statistic {
             CellResult result = new CellResult(time, lat, lng, val);
             resultArray.add(result);
         }
-        String json = new Gson().toJson(resultArray);
-        return json;
+        try {
+            Writer writer = new FileWriter("custom.json");
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            gson.toJson(resultArray, writer);
+        } catch (IOException ex) {
+            System.err.println("couldnt write file");
+        }
     }
 
     private class CellResult {

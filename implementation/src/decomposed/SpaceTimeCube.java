@@ -105,7 +105,7 @@ public class SpaceTimeCube implements Iterable<SpaceTimeCube.SpaceTimeCell> {
         }
     }
     
-    public List<SpaceTimeCell> getNeighbours(SpaceTimeCell cell) {
+    public List<SpaceTimeCube.SpaceTimeCell> getNeighbours(SpaceTimeCell cell) {
         ArrayList<SpaceTimeCell> result = new ArrayList<>();
         int startPlane = cell.getTimeLocation();
         for (int i = -1; i <= 1; i++) {

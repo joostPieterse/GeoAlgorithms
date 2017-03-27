@@ -42,7 +42,7 @@ public class Main {
                     Duration.ofHours(1));
             System.out.println("Calculating statistic for cube");
             Statistic stat = new Statistic(cube);
-            System.out.println(stat.getJson(stat.customStatistic(50)));
+            stat.getJson(stat.customStatistic(0));
             //*/
         } catch (FileNotFoundException ex) {
             ex.printStackTrace();
@@ -63,8 +63,7 @@ public class Main {
         cube.addTimedRoute(route);
         Statistic statistic = new Statistic(cube);
         Map<SpaceTimeCube.SpaceTimeCell, Double> map = statistic.customStatistic(20);
-        String json = statistic.getJson(map);
-        System.out.println(json);
+        statistic.getJson(map);
     }
 }
 
