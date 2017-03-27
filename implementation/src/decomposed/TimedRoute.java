@@ -3,8 +3,11 @@ package decomposed;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 /**
  *
@@ -34,13 +37,18 @@ public class TimedRoute extends Route{
         return Duration.between(endTime, startTime);
     }
     
+    public boolean overlapsTimeRange(LocalDateTime begin, LocalDateTime end) {
+        return end.isAfter(startTime) && begin.isBefore(endTime);
+    }
+    
     public boolean timeContained(LocalDateTime time) {
         return (time.isAfter(startTime) && time.isBefore(endTime)) || time.isEqual(startTime) || time.isEqual(endTime);
     }
     
     public Location interpolateTime(LocalDateTime time, ChronoUnit precision) {
         if (!timeContained(time))
-            throw new ContainmentException("Queried time not contained in route time");
+            throw new ContainmentException("Queried time " + time.format(SpaceTimeCube.dateTimeFormat) + " not contained in route time " 
+                    + startTime.format(SpaceTimeCube.dateTimeFormat) + "~" + endTime.format(SpaceTimeCube.dateTimeFormat));
         double startToTime = startTime.until(time, precision);
         double timeToEnd = time.until(endTime, precision);
         double interpolation = startToTime / (startToTime + timeToEnd);
@@ -48,22 +56,48 @@ public class TimedRoute extends Route{
         return interpolateFraction(interpolation);
     }
     
-    public Route subRouteInTimespan(LocalDateTime start, LocalDateTime end, ChronoUnit precision) {
+    public TimedRoute subRouteInTimespan(LocalDateTime start, LocalDateTime end, ChronoUnit precision) {
         //System.out.println("Subroute of TimedRoute " + this + " in time interval " 
         //        + start.format(SpaceTimeCube.dateTimeFormat) + "~" + end.format(SpaceTimeCube.dateTimeFormat));
         if (!end.isAfter(start))
-            throw new RangeException("Invalid time range given");
+            throw new RangeException("Invalid time range given " 
+                    + start.format(SpaceTimeCube.dateTimeFormat) + "~" + end.format(SpaceTimeCube.dateTimeFormat)
+                    + " while handling TimedRoute in range " + startTime.format(SpaceTimeCube.dateTimeFormat) + "~" 
+                    + endTime.format(SpaceTimeCube.dateTimeFormat));
         if (start.isBefore(this.startTime)) {
             start = this.startTime;
         }
         if (end.isAfter(this.endTime)) {
             end = this.endTime;
         }
-        Route result = new Route(
+        TimedRoute result = new TimedRoute(
                 interpolateTime(start, precision),
-                interpolateTime(end, precision)
+                interpolateTime(end, precision),
+                start,
+                end
         );
         //System.out.println("Resulting route: " + result);
+        return result;
+    }
+    
+    public List<TimedRoute> subRoutesOnTimeDivision(Duration timestep, ChronoUnit precision) {
+        ArrayList<TimedRoute> result = new ArrayList<>();
+        if (this.tripDistance >= 2 * this.getDistanceInMiles()) {
+            result.add(new TimedRoute(start, start, startTime, startTime));
+            result.add(new TimedRoute(end, end, endTime, endTime));
+        } else {
+            int layer = 0;
+            LocalDateTime searchStart = LocalTime.MIN.atDate(startTime.toLocalDate());
+            while (!overlapsTimeRange(searchStart.plus(timestep.multipliedBy(layer)), searchStart.plus(timestep.multipliedBy(layer + 1)))) {
+                layer++;
+            }
+            do {
+                LocalDateTime qStart = searchStart.plus(timestep.multipliedBy(layer++));
+                LocalDateTime qEnd = qStart.plus(timestep);
+                result.add(subRouteInTimespan(qStart.isAfter(startTime) ? qStart : startTime, 
+                        qEnd.isBefore(endTime) ? qEnd : endTime, precision));
+            } while(overlapsTimeRange(searchStart.plus(timestep.multipliedBy(layer)), searchStart.plus(timestep.multipliedBy(layer + 1))));
+        }
         return result;
     }
     
@@ -89,6 +123,13 @@ public class TimedRoute extends Route{
         return result;
     }
     
+    public static Optional<TimedRoute> parseLineOptional(String line) {
+        try {
+            return Optional.of(parseLine(line));
+        } catch (java.time.format.DateTimeParseException | IllegalArgumentException ex) {
+            return Optional.empty();
+        }
+    }
     
     class RangeException extends RuntimeException {
 

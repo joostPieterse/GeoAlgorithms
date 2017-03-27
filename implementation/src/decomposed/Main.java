@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.Year;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author s132054
@@ -27,16 +28,26 @@ public class Main {
                     new Location(MIN_LAT, MIN_LONG)
             );
             System.out.println("Building space-time cube");
+            /*
             SpaceTimeCube cube = new SpaceTimeCube(boundery, new RelativeLocation(STEP_SIZE, STEP_SIZE),
                     LocalDateTime.of(2016, Month.JANUARY, 1, 0, 0),
                     LocalDateTime.of(2016, Month.FEBRUARY, 1, 0, 0),
                     Duration.ofHours(1));
             System.out.println("Loading file into space-time cube");
             SpaceTimeCube.loadFromFile(cube, new File("data/yellow_tripdata_2016-01.csv"));
+            //*/
+            //*
+            SpaceTimeCube cube = SpaceTimeCube.loadFromFileParallel(new File("data/yellow_tripdata_2016-01.csv"), boundery, 
+                    new RelativeLocation(STEP_SIZE, STEP_SIZE),
+                    Duration.ofHours(1));
+            System.out.println("Calculating statistic for cube");
+            Statistic stat = new Statistic(cube);
+            System.out.println(stat.getJson(stat.customStatistic(50)));
+            //*/
         } catch (FileNotFoundException ex) {
             ex.printStackTrace();
         }
-        new Main().testDecomposedStatistic();
+        //new Main().testDecomposedStatistic();
     }
 
     private void testDecomposedStatistic() {
@@ -45,13 +56,13 @@ public class Main {
         LocalDateTime startTime = LocalDateTime.of(2017, 3, 22, 0, 0);
         LocalDateTime endTime = LocalDateTime.of(2017, 3, 22, 23, 59);
         Duration timeStep = Duration.ofMinutes(60);
-        decomposed.SpaceTimeCube cube = new decomposed.SpaceTimeCube(area, relativeLocation, startTime, endTime, timeStep);
+        decomposed.SpaceTimeCube cube = new decomposed.SpaceTimeCube(area, relativeLocation, timeStep);
         TimedRoute route = new TimedRoute(new Location(40.78, 74.0), new Location(40.78, 74.1), LocalDateTime.of(2017, 3, 22, 10, 5), LocalDateTime.of(2017, 3, 22, 11, 5));
         cube.addTimedRoute(route);
         route = new TimedRoute(new Location(40.78, 74.1), new Location(40.78, 7421), LocalDateTime.of(2017, 3, 22, 10, 5), LocalDateTime.of(2017, 3, 22, 13, 5));
         cube.addTimedRoute(route);
         Statistic statistic = new Statistic(cube);
-        HashMap<SpaceTimeCell, Double> map = statistic.customStatistic(20);
+        Map<SpaceTimeCube.SpaceTimeCell, Double> map = statistic.customStatistic(20);
         String json = statistic.getJson(map);
         System.out.println(json);
     }
