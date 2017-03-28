@@ -71,7 +71,7 @@ public class Statistic {
      * @return the greatest cells according to this statistics
      */
     public Map<SpaceTimeCube.SpaceTimeCell, Double> customStatistic(int numResults) {
-        System.out.println("Start calculating statistic");
+        System.out.println("Starting calculation of statistic");
         Map<SpaceTimeCube.SpaceTimeCell, Integer> statisticValues = new HashMap<>();
         int l = -1;
         long time = System.currentTimeMillis();
@@ -83,33 +83,36 @@ public class Statistic {
             statisticValues.put(cell, customStatisticPerCell(cell));
         }
         
-        System.out.println("Retrieve sum of each plane");
+        System.out.println("Retrieving sum of each plane");
         Map<Integer, Integer> maxs = new HashMap<>();
         for (Map.Entry<SpaceTimeCube.SpaceTimeCell, Integer> e : statisticValues.entrySet()) {
             maxs.merge(e.getKey().getTimeLocation(), e.getValue(), Integer::sum);
         }
-        System.out.println("Sums: ");
-        for (Map.Entry<Integer, Integer> e : maxs.entrySet()) {
-            System.out.println(e.getKey() + ": " + e.getValue());
-        }
         
-        System.out.println("Divide all statistics with plane sum");
+        System.out.println("Dividing all statistics with plane sum");
         Map<SpaceTimeCube.SpaceTimeCell, Double> statisticNormal = new HashMap<>();
         for (Map.Entry<SpaceTimeCube.SpaceTimeCell, Integer> e : statisticValues.entrySet()) {
             statisticNormal.put(e.getKey(), (double) e.getValue() / (double) maxs.get(e.getKey().getTimeLocation()));
         }
         
-        //retrieve x cells with largest statistic
-        System.out.println("Retrieving top " + numResults + " cells");
-        Stream<Map.Entry<SpaceTimeCube.SpaceTimeCell, Double>> stream = statisticNormal.entrySet().stream().sorted((a, b)->{
-            return Double.compare(b.getValue(), a.getValue());
-        }).filter(e->e.getValue() > 0);
-        if (numResults > 0) {
-            stream = stream.limit(numResults);
+        //group by planes
+        System.out.println("Grouping statistics by plane");
+        Map<Integer, Map<SpaceTimeCube.SpaceTimeCell, Double>> statisticByPlane = statisticNormal.entrySet().stream()
+                .collect(Collectors.groupingBy(e->e.getKey().getTimeLocation(), Collectors.toMap(e->e.getKey(), e->e.getValue())));
+        
+        //get top numResults from each plane
+        System.out.println("Getting top " + numResults + " for each plane");
+        Map<Integer, Map<SpaceTimeCube.SpaceTimeCell, Double>> statisticByPlaneTop = new HashMap<>();
+        for (Map.Entry<Integer, Map<SpaceTimeCube.SpaceTimeCell, Double>> planeStats : statisticByPlane.entrySet()) {
+            statisticByPlane.put(planeStats.getKey(), planeStats.getValue().entrySet().stream()
+                    .sorted((a, b)->Double.compare(b.getValue(), a.getValue()))
+                    .limit(numResults)
+                    .collect(Collectors.toMap(e->e.getKey(), e->e.getValue())));
         }
-        return stream.collect(Collectors.toMap(Map.Entry::getKey, e->{
-            return (double) e.getValue();
-        }));
+        //flatten top results and return
+        System.out.println("Flattening result for output");
+        return statisticByPlane.entrySet().stream()
+                .flatMap(e->e.getValue().entrySet().stream()).collect(Collectors.toMap(e->e.getKey(), e->e.getValue()));
     }
 
     /*
@@ -167,7 +170,7 @@ public class Statistic {
     public void getJson(Map<SpaceTimeCube.SpaceTimeCell, Double> map) {
         ArrayList<CellResult> resultArray = new ArrayList<>();
         for (SpaceTimeCube.SpaceTimeCell cell : map.keySet()) {
-            System.out.println("[" + cell.cell.getCenter().longitude + ", " + cell.cell.getCenter().latitude + ", " + cell.getTimeLocation() + "] " + map.get(cell));
+            //System.out.println("[" + cell.cell.getCenter().longitude + ", " + cell.cell.getCenter().latitude + ", " + cell.getTimeLocation() + "] " + map.get(cell));
             String lat = Double.toString(cell.cell.getCenter().latitude);
             String lng = Double.toString(cell.cell.getCenter().longitude);
             int time = cell.getTimeLocation();
@@ -175,8 +178,7 @@ public class Statistic {
             CellResult result = new CellResult(time, lat, lng, val);
             resultArray.add(result);
         }
-        try {
-            Writer writer = new FileWriter("custom.json");
+        try (Writer writer = new FileWriter("custom.json", false)) {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             gson.toJson(resultArray, writer);
         } catch (IOException ex) {

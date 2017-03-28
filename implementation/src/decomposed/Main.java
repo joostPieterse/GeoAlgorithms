@@ -20,6 +20,7 @@ public class Main {
     private static final double MIN_LAT = 40.5;
     private static final double MAX_LAT = 40.9;
     public static final double STEP_SIZE = 0.001;
+    private static final Duration TIMESTEP = Duration.ofHours(1);
 
     public static void main(String[] args) {
         try {
@@ -39,10 +40,10 @@ public class Main {
             //*
             SpaceTimeCube cube = SpaceTimeCube.loadFromFileParallel(new File("data/yellow_tripdata_2016-01.csv"), boundery, 
                     new RelativeLocation(STEP_SIZE, STEP_SIZE),
-                    Duration.ofHours(1));
+                    TIMESTEP);
             System.out.println("Calculating statistic for cube");
             Statistic stat = new Statistic(cube);
-            stat.getJson(stat.customStatistic(0));
+            stat.getJson(stat.customStatistic(250));
             //*/
         } catch (FileNotFoundException ex) {
             ex.printStackTrace();
