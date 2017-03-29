@@ -43,7 +43,8 @@ public class Main {
                     TIMESTEP);
             System.out.println("Calculating statistic for cube");
             Statistic stat = new Statistic(cube);
-            stat.getJson(stat.customStatistic(250));
+            stat.getJson(stat.customStatistic(250), "custom.json");
+            stat.getJson(stat.getisOrdStatistic(250), "getisord.json");
             //*/
         } catch (FileNotFoundException ex) {
             ex.printStackTrace();
@@ -64,7 +65,7 @@ public class Main {
         cube.addTimedRoute(route);
         Statistic statistic = new Statistic(cube);
         Map<SpaceTimeCube.SpaceTimeCell, Double> map = statistic.customStatistic(20);
-        statistic.getJson(map);
+        statistic.getJson(map, "bla.json");
     }
 }
 

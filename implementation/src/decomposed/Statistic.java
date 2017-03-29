@@ -26,45 +26,10 @@ public class Statistic {
     }
 
     private int customStatisticPerCell(SpaceTimeCube.SpaceTimeCell cell) {
-        int result = cube.getNeighbours(cell).stream().map(c->c.cell.getValue()).reduce(0, Integer::sum);
-        result += 25 * cell.cell.getValue();
+        int result = cube.getNeighbours(cell).stream().map(c->c.getValue()).reduce(0, Integer::sum);
+        result += 25 * cell.getValue();
         return result;
     }
-    /*
-    private int neightbourSum(int latitude, int longitude, int time) {
-        int result = 0;
-        AttributePlane[] planes = cube.planes;
-        for (int i = -1; i <= 1; i++) {
-            for (int j = -1; j <= 1; j++) {
-                for (int k = -1; k <= 1; k++) {
-                    if (longitude + i < planes[time].getPlane()[0].length && longitude + i >= 0 &&
-                            latitude + j < planes[time].getPlane().length && latitude + j >= 0 &&
-                            time + k < planes.length && time + k >= 0) {
-                        result += planes[time + k].getPlane()[latitude + j][longitude + i];
-                    }
-                }
-            }
-        }
-        return result;
-    }
-    *//*
-    private int neightbourSumSquared(int latitude, int longitude, int time) {
-        int result = 0;
-        AttributePlane[] planes = cube.planes;
-        for (int i = -1; i <= 1; i++) {
-            for (int j = -1; j <= 1; j++) {
-                for (int k = -1; k <= 1; k++) {
-                    if (longitude + i < planes[time].getPlane()[0].length && longitude + i >= 0 &&
-                            latitude + j < planes[time].getPlane().length && latitude + j >= 0 &&
-                            time + k < planes.length && time + k >= 0) {
-                        result += Math.pow(planes[time + k].getPlane()[latitude + j][longitude + i], 2);
-                    }
-                }
-            }
-        }
-        return result;
-    }
-    */
 
     /**
      * @param numResults the number of cells that is returned
@@ -95,6 +60,35 @@ public class Statistic {
             statisticNormal.put(e.getKey(), (double) e.getValue() / (double) maxs.get(e.getKey().getTimeLocation()));
         }
         
+        return statisticTopX(statisticNormal, numResults);
+    }
+    
+    public Map<SpaceTimeCube.SpaceTimeCell, Double> getisOrdStatistic(int numResults) {
+        System.out.println("Starting calculation of Getis Ord statistic");
+        int n = cube.getSize();
+        int Xbar = 0;
+        int XsqrtBar = 0;
+        for (SpaceTimeCube.SpaceTimeCell cell : cube) {
+            Xbar += cell.getValue();
+            XsqrtBar += cell.getValue() * cell.getValue();
+        }
+        Xbar /= n;
+        XsqrtBar /= n;
+        int XbarSqrt = Xbar * Xbar;
+        double S = Math.sqrt(XsqrtBar - XbarSqrt);
+        double rightS = Math.sqrt((n*27 - 729)/(n - 1));
+        double bottom = S*rightS;
+        
+        Map<SpaceTimeCube.SpaceTimeCell, Double> statisticValues = new HashMap<>();
+        for (SpaceTimeCube.SpaceTimeCell cell : cube) {
+            double neighbourSum = cube.getNeighbours(cell).stream().collect(Collectors.summingDouble(e->(double) e.getValue()));
+            statisticValues.put(cell, (neighbourSum - (Xbar * 27))/bottom);
+        }
+        
+        return statisticTopX(statisticValues, numResults);
+    }
+
+    private Map<SpaceTimeCube.SpaceTimeCell, Double> statisticTopX(Map<SpaceTimeCube.SpaceTimeCell, Double> statisticNormal, int numResults) {
         //group by planes
         System.out.println("Grouping statistics by plane");
         Map<Integer, Map<SpaceTimeCube.SpaceTimeCell, Double>> statisticByPlane = statisticNormal.entrySet().stream()
@@ -115,59 +109,7 @@ public class Statistic {
                 .flatMap(e->e.getValue().entrySet().stream()).collect(Collectors.toMap(e->e.getKey(), e->e.getValue()));
     }
 
-    /*
-    private HashMap<SpaceTimeCell, Double> getMaxValues(double[][][] statisticValues, int numResults) {
-        System.out.println("Start calculating max values");
-        HashMap<SpaceTimeCell, Double> maxValueMap = new HashMap<>();
-        for (int longitude = 0; longitude < statisticValues.length; longitude++) {
-            for (int latitude = 0; latitude < statisticValues[longitude].length; latitude++) {
-                for (int time = 0; time < statisticValues[longitude][latitude].length; time++) {
-                    double currentValue = statisticValues[longitude][latitude][time];
-                    SpaceTimeCell currentCell = new SpaceTimeCell(latitude, longitude, time);
-                    //add cell if the map is not yet full, check if it is larger than the smallest value in the map otherwise
-                    if (maxValueMap.size() < numResults) {
-                        maxValueMap.put(currentCell, (double) statisticValues[longitude][latitude][time]);
-                    } else {
-                        SpaceTimeCell smallestCell = null;
-                        double smallestValue = Double.MAX_VALUE;
-                        //check if there is a larger value in the map
-                        for (SpaceTimeCell cell : maxValueMap.keySet()) {
-                            double value = statisticValues[cell.longitude][cell.latitude][cell.time];
-                            if (value < smallestValue) {
-                                smallestCell = cell;
-                                smallestValue = value;
-                            }
-                        }
-                        if (currentValue > smallestValue) {
-                            maxValueMap.remove(smallestCell);
-                            maxValueMap.put(currentCell, (double) currentValue);
-                        }
-                    }
-                }
-            }
-        }
-        return maxValueMap;
-    }
-    */
-
-    public Map<SpaceTimeCube.SpaceTimeCell, Double> getisOrdStatistic(int numResults) {
-        Map<SpaceTimeCube.SpaceTimeCell, Double> Xbar = new HashMap<>();
-        for (SpaceTimeCube.SpaceTimeCell cell : cube) {
-            int sum = cube.getNeighbours(cell).stream().collect(Collectors.reducing(0, c->c.cell.getValue(), Integer::sum));
-            Xbar.put(cell, sum / 27.0);
-        }
-        Map<SpaceTimeCube.SpaceTimeCell, Double> XbarSqrt = Xbar.entrySet().stream().collect(Collectors.toMap(e->e.getKey(), e->Math.pow(e.getValue(), 2)));
-        Map<SpaceTimeCube.SpaceTimeCell, Double> S = new HashMap<>();
-        for (SpaceTimeCube.SpaceTimeCell cell : cube) {
-            int sum = cube.getNeighbours(cell).stream().collect(Collectors.reducing(0, c->(int) Math.pow(c.cell.getValue(), 2), Integer::sum));
-            Xbar.put(cell, Math.sqrt((sum / 27.0) - XbarSqrt.get(cell)));
-        }
-        //always 0...?
-        
-        return new HashMap<>();
-    }
-
-    public void getJson(Map<SpaceTimeCube.SpaceTimeCell, Double> map) {
+    public void getJson(Map<SpaceTimeCube.SpaceTimeCell, Double> map, String filename) {
         ArrayList<CellResult> resultArray = new ArrayList<>();
         for (SpaceTimeCube.SpaceTimeCell cell : map.keySet()) {
             //System.out.println("[" + cell.cell.getCenter().longitude + ", " + cell.cell.getCenter().latitude + ", " + cell.getTimeLocation() + "] " + map.get(cell));
@@ -178,7 +120,7 @@ public class Statistic {
             CellResult result = new CellResult(time, lat, lng, val);
             resultArray.add(result);
         }
-        try (Writer writer = new FileWriter("custom.json", false)) {
+        try (Writer writer = new FileWriter(filename, false)) {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             gson.toJson(resultArray, writer);
         } catch (IOException ex) {

@@ -57,6 +57,10 @@ public class SpaceTimeCube implements Iterable<SpaceTimeCube.SpaceTimeCell> {
         this.planes = planes;
     }
     
+    public int getSize() {
+        return planes.length * planes[0].getSize();
+    }
+    
     public AttributePlane getPlaneForTime(LocalTime time) {
         return planes[getPlaneIDForTime(time)];
     }
@@ -274,6 +278,10 @@ public class SpaceTimeCube implements Iterable<SpaceTimeCube.SpaceTimeCell> {
         @Override
         public String toString() {
             return timeLocation + ": " + cell.toString();
+        }
+        
+        public int getValue () {
+            return cell.getValue();
         }
 
     }

@@ -43,6 +43,10 @@ public class AttributePlane implements Iterable<AttributePlane.PlaneCell> {
         this.plane = new int[lat][lng];
     }
     
+    public int getSize() {
+        return plane.length * plane[0].length;
+    }
+    
     public PlaneCell getCellFromLocation(Location location) {
         if (!area.contains(location))
             throw new ContainmentException("Location " + location + " not contained in area bounds " + area);
