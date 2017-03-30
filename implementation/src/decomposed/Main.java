@@ -43,6 +43,7 @@ public class Main {
                     TIMESTEP);
             System.out.println("Calculating statistic for cube");
             Statistic stat = new Statistic(cube);
+            stat.getJson(stat.customStatistic(50), "custom_50.json");
             stat.getJson(stat.customStatistic(250), "custom.json");
             stat.getJson(stat.getisOrdStatistic(250), "getisord.json");
             //*/
