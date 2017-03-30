@@ -29,7 +29,7 @@
         .header-text{
             height: 50px;
             font-size: 40px;
-            font-family: cursive;
+            font-family: 'Roboto';
         }
         .header-slider {
             height: 80px;
@@ -66,17 +66,39 @@
 <body>
 <div id="header-overlay">
     <div class="header-item header-text">
-        The visualisation of the result of group 10.
+        The visualisation of the result of group 10
     </div>
     <div class="header-item">
         <div id="slider"></div>
     </div>
 </div>
 <script>
+    function getQueryVariable(variable)
+    {
+       var query = window.location.search.substring(1);
+       var vars = query.split("&");
+       for (var i=0;i<vars.length;i++) {
+               var pair = vars[i].split("=");
+               if(pair[0] == variable){return pair[1];}
+       }
+       return(false);
+    }
+    var minimum = getQueryVariable("min")
+    var maximum = getQueryVariable("max")
+    if(!(0 <= minimum && minimum <= 23)){
+        minimum = 0;   
+    }
+    if(!(1 <= maximum && maximum <= 24)){
+        maximum = minimum+1;   
+    }
+    if(minimum > maximum - 1){
+        minimum = 0;
+        maximum = 1;
+    }
     $("#slider").rangeSlider({
         bounds: {min: 0, max: 24},
-        defaultValues:{min: 0, max: 1},
-        range: {min: 0.25, max: 24},// Primary scale
+        defaultValues:{min: minimum, max: maximum},
+        range: {min: 1, max: 24},// Primary scale
         scales: [
             // Primary scale
         {
@@ -111,7 +133,7 @@
     <button onclick="changeGradient()">Change gradient</button>
     <button onclick="changeRadius()">Change radius</button>
     <button onclick="changeOpacity()">Change opacity</button>
-    <button onclick="changeFileOfPoints()" class="header-file-name">File name: custom.json</button>
+    <button onclick="changeFileOfPoints()" class="header-file-name">Current file: custom250.json</button>
 </div>
 <div id="map"></div>
 <script>
@@ -141,7 +163,7 @@
     initAll();
     function initAll(){
         jsonFileCounter = 0;
-        jsonFileName = ['custom','getisord'];
+        jsonFileName = ['custom250','getisord250','custom50'];
         getJsonOfPoints();
     }
 
@@ -159,7 +181,7 @@
     function changeFileOfPoints(){
         jsonFileCounter = (jsonFileCounter + 1) % jsonFileName.length;
         console.log("Changed the data set to json/"+jsonFileName[jsonFileCounter]+".json");
-        $('.header-file-name').html("File name: "+jsonFileName[jsonFileCounter]+".json");
+        $('.header-file-name').html("Current file: "+jsonFileName[jsonFileCounter]+".json");
         getJsonOfPoints();
     }
 
@@ -173,7 +195,7 @@
 
         var counter = 0;
         $.each( jsonData, function( i, item ) {
-            if(minMinute <= item.Time && maxMinute > item.Time){
+            if(minMinute <= item.Time+0.5 && maxMinute > item.Time+0.5){
                 counter++;
                 pointArray.push({location: new google.maps.LatLng(item.Lat, item.Long)});
             }
