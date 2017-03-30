@@ -29,7 +29,7 @@
         .header-text{
             height: 50px;
             font-size: 40px;
-            font-family: cursive;
+            font-family: 'Roboto';
         }
         .header-slider {
             height: 80px;
@@ -66,7 +66,7 @@
 <body>
 <div id="header-overlay">
     <div class="header-item header-text">
-        The visualisation of the result of group 10.
+        The visualisation of the result of group 10
     </div>
     <div class="header-item">
         <div id="slider"></div>
@@ -111,7 +111,7 @@
     <button onclick="changeGradient()">Change gradient</button>
     <button onclick="changeRadius()">Change radius</button>
     <button onclick="changeOpacity()">Change opacity</button>
-    <button onclick="changeFileOfPoints()" class="header-file-name">File name: custom.json</button>
+    <button onclick="changeFileOfPoints()" class="header-file-name">Current file: custom.json</button>
 </div>
 <div id="map"></div>
 <script>
@@ -159,7 +159,7 @@
     function changeFileOfPoints(){
         jsonFileCounter = (jsonFileCounter + 1) % jsonFileName.length;
         console.log("Changed the data set to json/"+jsonFileName[jsonFileCounter]+".json");
-        $('.header-file-name').html("File name: "+jsonFileName[jsonFileCounter]+".json");
+        $('.header-file-name').html("Current file: "+jsonFileName[jsonFileCounter]+".json");
         getJsonOfPoints();
     }
 
