@@ -85,10 +85,10 @@
     }
     var minimum = getQueryVariable("min")
     var maximum = getQueryVariable("max")
-    if(!(0 <= minimum && minimum <= 23){
+    if(!(0 <= minimum && minimum <= 23)){
         minimum = 0;   
     }
-    if(!(1 <= maximum && maximum <= 24){
+    if(!(1 <= maximum && maximum <= 24)){
         maximum = minimum+1;   
     }
     if(minimum > maximum - 1){
