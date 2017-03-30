@@ -173,7 +173,7 @@
 
         var counter = 0;
         $.each( jsonData, function( i, item ) {
-            if(minMinute <= item.Time && maxMinute > item.Time){
+            if(minMinute <= item.Time+0.5 && maxMinute > item.Time+0.5){
                 counter++;
                 pointArray.push({location: new google.maps.LatLng(item.Lat, item.Long)});
             }
