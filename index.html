@@ -2,11 +2,11 @@
 <html>
 <head>
     <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>-->
-    <script src="web-src/deps/jquery-3.2.0.min.js"></script>
-    <script src="web-src/deps/jquery-ui-1.10.3.min.js"></script>
-    <script src="web-src/deps/jQuerySlider/jQRangeSlider-withRuler-min.js"></script>
+    <script src="implementation/web-src/deps/jquery-3.2.0.min.js"></script>
+    <script src="implementation/web-src/deps/jquery-ui-1.10.3.min.js"></script>
+    <script src="implementation/web-src/deps/jQuerySlider/jQRangeSlider-withRuler-min.js"></script>
 
-    <link rel="stylesheet" href="web-src/deps/jQuerySlider/css/iThing-min.css" type="text/css" />
+    <link rel="stylesheet" href="implementation/web-src/deps/jQuerySlider/css/iThing-min.css" type="text/css" />
 
     <meta charset="utf-8">
     <title>2IMA20 - Algorithms for geographic data</title>
@@ -147,7 +147,7 @@
 
     function getJsonOfPoints(){
         console.log(jsonFileName, jsonFileCounter, jsonFileName[jsonFileCounter]);
-        var jsonPointsUrl = "web-src/json/" + jsonFileName[jsonFileCounter] + ".json";
+        var jsonPointsUrl = "implementation/web-src/json/" + jsonFileName[jsonFileCounter] + ".json";
         console.log('Getting data set '+jsonPointsUrl);
         $.getJSON( jsonPointsUrl )
             .done(function( data ) {
