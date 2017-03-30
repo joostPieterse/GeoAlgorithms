@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>-->
+    <script src="web-src/deps/jquery-3.2.0.min.js"></script>
+    <script src="web-src/deps/jquery-ui-1.10.3.min.js"></script>
+    <script src="web-src/deps/jQuerySlider/jQRangeSlider-withRuler-min.js"></script>
+
+    <link rel="stylesheet" href="web-src/deps/jQuerySlider/css/iThing-min.css" type="text/css" />
+
+    <meta charset="utf-8">
+    <title>2IMA20 - Algorithms for geographic data</title>
+    <style>
+        /* Always set the map height explicitly to define the size of the div
+         * element that contains the map. */
+        #map {
+            height: calc(100% - 150px);
+        }
+        #header-overlay {
+            height: 160px;
+            margin: 0;
+        }
+        .header-item{
+            height: 80px;
+            margin: 0;
+            padding: 10px;
+            text-align: center;
+        }
+        .header-text{
+            height: 50px;
+            font-size: 40px;
+            font-family: cursive;
+        }
+        .header-slider {
+            height: 80px;
+        }
+        .slider-tick{
+            text-align:left;
+        }
+        /* Optional: Makes the sample page fill the window. */
+        html, body {
+            min-width:1000px;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        #floating-panel {
+            position: absolute;
+            top: 160px;
+            z-index: 5;
+            background-color: #fff;
+            padding: 5px;
+            border: 1px solid #999;
+            text-align: center;
+            font-family: 'Roboto','sans-serif';
+            line-height: 30px;
+            padding-left: 10px;
+            width: 40%;
+            margin: 0 auto;
+            left: 0;
+            right: 0;
+        }
+    </style>
+</head>
+
+<body>
+<div id="header-overlay">
+    <div class="header-item header-text">
+        The visualisation of the result of group 10.
+    </div>
+    <div class="header-item">
+        <div id="slider"></div>
+    </div>
+</div>
+<script>
+    $("#slider").rangeSlider({
+        bounds: {min: 0, max: 24},
+        defaultValues:{min: 0, max: 1},
+        range: {min: 0.25, max: 24},// Primary scale
+        scales: [
+            // Primary scale
+        {
+            first: function(val){ return val; },
+            next: function(val){ return val + 3; },
+            stop: function(val){ return false; },
+            label: function(val){ return val; },
+            format: function(tickContainer, tickStart, tickEnd){
+                tickContainer.addClass("slider-tick");
+            }
+        }
+        ,
+        // Secondary scale
+        {
+            first: function(val){ return val; },
+            next: function(val){
+                if (val % 3 === 2){
+                    return val + 2;
+                }
+                return val + 1;
+            },
+            stop: function(val){ return false; },
+            label: function(){ return null; }
+        }
+        ]
+    });
+
+    $('.ui-ruler-tick-label').html('');
+</script>
+<div id="floating-panel">
+    <button onclick="toggleHeatmap()">Toggle Heatmap</button>
+    <button onclick="changeGradient()">Change gradient</button>
+    <button onclick="changeRadius()">Change radius</button>
+    <button onclick="changeOpacity()">Change opacity</button>
+    <button onclick="changeFileOfPoints()" class="header-file-name">File name: custom.json</button>
+</div>
+<div id="map"></div>
+<script>
+
+    // This example requires the Visualization library. Include the libraries=visualization
+    // parameter when you first load the API. For example:
+    // <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=visualization">
+
+    var map, heatmap, pointArray, jsonFileName, jsonFileCounter, jsonData;
+
+    function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 10,
+            maxZoom: 14,
+            minZoom: 8,
+            center: {lat: 40.7, lng: -73.975}
+        });
+
+        pointArray = new google.maps.MVCArray();
+        heatmap = new google.maps.visualization.HeatmapLayer({
+            data: pointArray,
+            map: map,
+            opacity: 1
+        });
+    }
+
+    initAll();
+    function initAll(){
+        jsonFileCounter = 0;
+        jsonFileName = ['custom','getisord'];
+        getJsonOfPoints();
+    }
+
+    function getJsonOfPoints(){
+        console.log(jsonFileName, jsonFileCounter, jsonFileName[jsonFileCounter]);
+        var jsonPointsUrl = "web-src/json/" + jsonFileName[jsonFileCounter] + ".json";
+        console.log('Getting data set '+jsonPointsUrl);
+        $.getJSON( jsonPointsUrl )
+            .done(function( data ) {
+                jsonData = data;
+                processPoints();
+            });
+    }
+
+    function changeFileOfPoints(){
+        jsonFileCounter = (jsonFileCounter + 1) % jsonFileName.length;
+        console.log("Changed the data set to json/"+jsonFileName[jsonFileCounter]+".json");
+        $('.header-file-name').html("File name: "+jsonFileName[jsonFileCounter]+".json");
+        getJsonOfPoints();
+    }
+
+    function processPoints(){
+        // Clearing the array
+        while (pointArray.length>0) { pointArray.pop(); }
+        // Getting settings of the rangeslider
+        var basicValues = $("#slider").rangeSlider("values");
+        var minMinute = basicValues.min;
+        var maxMinute = basicValues.max;
+
+        var counter = 0;
+        $.each( jsonData, function( i, item ) {
+            if(minMinute <= item.Time && maxMinute > item.Time){
+                counter++;
+                pointArray.push({location: new google.maps.LatLng(item.Lat, item.Long)});
+            }
+        });
+        console.log('Amount of elements shown is '+counter);
+    }
+
+    function toggleHeatmap() {
+        heatmap.setMap(heatmap.getMap() ? null : map);
+    }
+
+    function changeGradient() {
+        var gradient = [
+            'rgba(0, 255, 255, 0)',
+            'rgba(0, 255, 255, 1)',
+            'rgba(0, 191, 255, 1)',
+            'rgba(0, 127, 255, 1)',
+            'rgba(0, 63, 255, 1)',
+            'rgba(0, 0, 255, 1)',
+            'rgba(0, 0, 223, 1)',
+            'rgba(0, 0, 191, 1)',
+            'rgba(0, 0, 159, 1)',
+            'rgba(0, 0, 127, 1)',
+            'rgba(63, 0, 91, 1)',
+            'rgba(127, 0, 63, 1)',
+            'rgba(191, 0, 31, 1)',
+            'rgba(255, 0, 0, 1)'
+        ];
+        heatmap.set('gradient', heatmap.get('gradient') ? null : gradient);
+    }
+
+    function changeRadius() {
+        heatmap.set('radius', heatmap.get('radius') ? null : 20);
+    }
+
+    function changeOpacity() {
+        heatmap.set('opacity', 1);
+    }
+
+    $("#slider").bind("valuesChanged", function(e, data){
+        console.log("Values just changed. min: " + data.values.min + " max: " + data.values.max);
+        processPoints();
+    });
+</script>
+<script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAeriFFgetsIAeOD5vP9lMDnbEQHhHDrCc&libraries=visualization&callback=initMap">
+</script>
+</body>
+</html>
