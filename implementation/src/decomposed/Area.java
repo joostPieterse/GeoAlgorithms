@@ -14,7 +14,7 @@ public class Area {
 
     public Area(Location topLeftCorner, Location bottomRightCorner) {
         if (bottomRightCorner.latitude > topLeftCorner.latitude || bottomRightCorner.longitude > topLeftCorner.longitude)
-            throw new IllegalArgumentException("Invalid area given");
+            throw new IllegalArgumentException("Invalid area given: " + bottomRightCorner + " | " + topLeftCorner);
         this.topLeftCorner = topLeftCorner;
         this.bottomRightCorner = bottomRightCorner;
     }
@@ -37,6 +37,11 @@ public class Area {
     public boolean contains(Location point) {
         return bottomRightCorner.longitude <= point.longitude && point.longitude <= topLeftCorner.longitude
                 && bottomRightCorner.latitude <= point.latitude && point.latitude <= topLeftCorner.latitude;
+    }
+    
+    public boolean similar(Area other) {
+        return (RelativeLocation.getRelativeLocation(topLeftCorner, other.topLeftCorner).size() < getSize().size() / 2.0) &&
+                (RelativeLocation.getRelativeLocation(bottomRightCorner, other.bottomRightCorner).size() < getSize().size() / 2.0);
     }
     
     public RelativeLocation getSize() {

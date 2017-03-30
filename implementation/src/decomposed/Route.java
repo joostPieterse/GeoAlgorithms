@@ -39,6 +39,24 @@ public class Route {
             });
         }
     }
+    
+    public double getDistanceInMiles() {
+        /* 
+        a = sin^2(dlat/2) + cos lat1 * cos lat2 * sin^2(dlng/2)
+        c = 2 ⋅ atan2( √a, √(1−a) )
+        d = R ⋅ c
+        */
+        double R = 3959.0;
+        double latStart = Math.toRadians(start.latitude);
+        double latEnd = Math.toRadians(end.latitude);
+        double latD = Math.toRadians(end.latitude - start.latitude);
+        double lngD = Math.toRadians(end.longitude - start.longitude);
+        
+        double a = Math.pow(Math.sin(latD/2.0), 2.0) + Math.cos(latStart) * Math.cos(latEnd) * Math.pow(Math.sin(lngD/2.0), 2.0);
+        double c = 2*Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        double d = R * c;
+        return d;
+    }
 
     @Override
     public String toString() {
